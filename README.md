@@ -10,7 +10,26 @@ An LMS or platform service (`COSYplatform`) manages student logins, classroom hu
 
 Designed as a modern, high-velocity database-first creator application inspired by **Notion**, **Airtable**, **Linear**, **Figma**, **ProgressMe**, and **Edvibe**, COSYstudio powers thousands of Reusable Learning Objects (RLOs) without nested folder silos or content duplication.
 
-Everything in COSYstudio is an atomic **Content Object (`ContentObject`)** identified by an immutable Content Identifier (`cid`). Dynamic database filtering and Airtable-like views replace traditional folder trees.
+### The Universal Learning Object (ULO) Paradigm Shift
+
+COSYstudio does **NOT "contain" lessons or siloed folder trees**. Instead, every entity is an instance of the **Universal Learning Object (ULO)** underlying primitive:
+
+```
+                         UNIVERSAL LEARNING OBJECT (ULO)
+                                        │
+    ├── Lesson                 ├── Grammar Topic          ├── Game Level
+    ├── Exercise               ├── Article                ├── Worksheet
+    ├── Dialogue               ├── Conversation Club      ├── Assessment
+    ├── Vocabulary Set         ├── Quest                  ├── Audio / Video / Image
+```
+
+Each ULO carries **6 Fundamental Dimensions**:
+1. **Metadata**: Language, CEFR, Theme, Skills, Age, Target Audience, Duration, Objectives, Status, Tags, Difficulty.
+2. **Relationships**: Directed Graph Edges (`CONTAINS`, `DEPENDS_ON`, `EXPLAINS`, `EXERCISES`, `TRANSFORMS_TO`, `REFERENCES_MEDIA`, `EVALUATES`).
+3. **Version History**: Immutable SemVer snapshots (`v1.0.0`) & dynamic pointer aliases (`@production`).
+4. **AI Actions**: 21 native contextual generation and transformation actions.
+5. **Localization**: Multi-target translation matrix across 14 ISO languages.
+6. **Publication Targets & Transformation**: Dynamic target transformation engine compiling ULOs into target-specific schemas (`COSYlanguages`, `COSYworld`, `COSYgames`, `COSYmagazine`, PDF Worksheet, Classroom Presentation, Mobile App, API) without content duplication.
 
 ## Integrated AI Assistant (21 Native Actions)
 
@@ -19,18 +38,6 @@ COSYstudio features a native **Integrated AI Assistant** with real-time context 
 - **21 Native AI Actions**: Generate lesson, Improve lesson, Simplify, Increase CEFR, Translate, Generate vocabulary, Generate examples, Generate IPA, Generate pronunciation, Generate quiz, Generate discussion, Generate homework, Generate article, Generate worksheet, Generate listening, Generate TTS, Generate images, Generate dialogue, Generate roleplay, Generate cultural notes, Generate metadata.
 - **Cross-Repository Context Engine**: Queries `COSYdata` lexicon, `COSYmanuals` curriculums, `COSYpractice` telemetry, `COSYworld` RPG quests, `COSYmagazine` articles, and `COSYtools` conjugators.
 - **Human-in-the-Loop Review**: Authors review, edit, and approve candidate RLOs before edge CDN publishing and auto-linking.
-
-## Educational Content Knowledge Graph & Automatic Propagation
-
-COSYstudio structures all content as a **Directed Knowledge Graph**:
-
-```
-Lesson -> Vocabulary -> Grammar -> Articles -> Games -> Quests -> Exercises -> Media -> Assessments -> Flashcards -> Pronunciation
-```
-
-- **Zero Information Duplication**: Lessons, articles, games, and quests reference canonical `cid_*` objects instead of copying content.
-- **Automatic Propagation**: Updating a single vocabulary word or grammar rule automatically updates every downstream lesson, game, worksheet, quest, and article using that word across the entire ecosystem via event bus broadcasts and edge CDN invalidation.
-- **SemVer & Alias Versioning**: Dynamic pointers (`@latest`, `@production`) auto-propagate non-breaking patch/minor updates while pinning breaking structural major changes (`v2.0.0`) for manual author review.
 
 ## Visual Lesson Builder & Block-Based Engine
 
@@ -46,11 +53,11 @@ COSYstudio includes a Notion-style drag-and-drop Visual Lesson Builder that oper
 
 | Repository | Domain Responsibility | Data Owned | Consumes From COSYstudio |
 | :--- | :--- | :--- | :--- |
-| **COSYstudio** | Central Content Operating System (CMS, Localization, Asset Pipelines) | Content Objects, Media Manifests, Localization Keys, Taxonomy | Core Provider |
-| **COSYdata** | Canonical Machine-Readable Data & Vocabulary Hub | Vocabulary JSON datasets, IPA transcriptions, `themes.json` taxonomy | `content.published` event stream, updated RLO schemas |
-| **COSYplatform** | Virtual Classroom, Student/Teacher Hub & Authentication | User Auth Credentials, Classroom session state, Paid course rights | Structured lesson templates & RLOs by `cid` |
+| **COSYstudio** | Central Content Operating System (CMS, Localization, Asset Pipelines) | Universal Learning Objects, Media Manifests, Localization Keys, Taxonomy | Core Provider |
+| **COSYdata** | Canonical Machine-Readable Data & Vocabulary Hub | Vocabulary JSON datasets, IPA transcriptions, `themes.json` taxonomy | `content.published` event stream, updated ULO schemas |
+| **COSYplatform** | Virtual Classroom, Student/Teacher Hub & Authentication | User Auth Credentials, Classroom session state, Paid course rights | Structured lesson templates & ULOs by `cid` |
 | **COSYlanguages** | Main Free Public Front Door & Language Hub Portal | Portal UI state, `config.js` registry, Placement quiz state | Course catalog metadata & localized UI descriptors |
-| **COSYpractice** | Free Interactive Practice Engine (SRS, Drills, Wheel) | Browser local storage SRS state, Practice scores, Session metrics | Vocabulary RLOs, Grammar exercise blocks, CCQ prompts |
+| **COSYpractice** | Free Interactive Practice Engine (SRS, Drills, Wheel) | Browser local storage SRS state, Practice scores, Session metrics | Vocabulary ULOs, Grammar exercise blocks, CCQ prompts |
 | **COSYtools** | Client-Side Offline Reference Engine (Conjugators, Declensions) | Tool-specific datasets (`tools/<lang>/`), Sharded dictionaries | Headword definitions, conjugation tables & grammatical rules |
 | **COSYgames** | Suite of 20 Interactive Standalone Language Games | Game match state, Session scores, Local high score history | Mini-game content bundles (`cid_gamepack_*`) |
 | **COSYevents** | Public Calendar Directory & Session Material Repository | Event definitions (`event.json`), Session JSONs (`public-events.json`) | Session prompt decks (`cid_eventpack_*`), Media assets |
@@ -63,8 +70,8 @@ COSYstudio includes a Notion-style drag-and-drop Visual Lesson Builder that oper
 COSYstudio consists of 12 modern, integrated modules engineered for high-scale RLO composition:
 
 1. **Dashboard**: Ecosystem content health, velocity metrics, and real-time activity stream.
-2. **Content Library**: Central searchable database repository for all RLOs with Linear-style filtering and "Reused In" impact graphs.
-3. **Curriculum**: Scope & sequence tree editor mapping RLOs into learning paths and CEFR tracks.
+2. **Content Library**: Central searchable database repository for all ULOs with Linear-style filtering and "Reused In" impact graphs.
+3. **Curriculum**: Scope & sequence tree editor mapping ULOs into learning paths and CEFR tracks.
 4. **Lesson Builder**: Notion-style slash command block editor and Figma-style canvas visualizer for interactive lesson flows.
 5. **Vocabulary Database**: Master lexicon manager with IPA phonetics, multi-target translation matrices, and audio attachments.
 6. **Grammar Database**: Canonical grammar rules with form-meaning-use breakdown blocks and pattern visualizers.
@@ -80,23 +87,22 @@ COSYstudio consists of 12 modern, integrated modules engineered for high-scale R
 For complete detailed specifications, diagrams, matrices, shared schemas, and migration strategies, please refer to:
 
 - 📖 **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Full Principal Architect specification document.
-  - **Section 1**: Integrated AI Assistant Architecture & 21 Native Actions
-  - **Section 2**: Educational Content Knowledge Graph & Non-Duplication Architecture
-  - **Section 3**: Automatic Update Propagation Engine
-  - **Section 4**: Versioning & Dependency Governance Strategy
+  - **Section 1**: Universal Learning Object (ULO) Architecture & 6 Core Dimensions
+  - **Section 2**: Publishing as Transformation (Zero Duplication)
+  - **Section 3**: Standardized ULO Metadata & TypeScript Schema
+  - **Section 4**: Integrated AI Assistant Architecture & 21 Native Actions
   - **Section 5**: High-Level Ecosystem Architecture Diagram
   - **Section 6**: Visual Lesson Builder & 100% JSON Block Engine (Zero XML)
-  - **Section 7**: Unified Content Object Model & Standardized Metadata
-  - **Section 8**: Entity Relationship Diagrams (ERDs)
-  - **Section 9**: Data Ownership Matrix (11 Repositories x Domains)
-  - **Section 10**: Verified Repository Boundary Analysis (11 Repositories)
-  - **Section 11**: Shared Packages (`@cosy/*`) & Governance
-  - **Section 12**: 5-Phase Zero-Downtime Migration Strategy
+  - **Section 7**: Entity Relationship Diagrams (ERDs)
+  - **Section 8**: Data Ownership Matrix (11 Repositories x Domains)
+  - **Section 9**: Verified Repository Boundary Analysis (11 Repositories)
+  - **Section 10**: Shared Packages (`@cosy/*`) & Governance
+  - **Section 11**: 5-Phase Zero-Downtime Migration Strategy
 
 ## Guiding Architectural Axioms
 
-1. **Context-Aware AI Creator**: 21 actions aware of the entire 11-repository Knowledge Graph.
-2. **Knowledge Graph Non-Duplication**: Content exists once in `COSYstudio` and is referenced via `cid`.
-3. **Automatic Propagation**: Updating a canonical object automatically updates every downstream app and lesson.
+1. **Universal Learning Object (ULO)**: Content exists once as a ULO primitive and is transformed for output targets rather than duplicated.
+2. **Publishing as Transformation**: Dynamic target transformation compiles ULOs for web, mobile, 3D RPG, print PDF, and API outputs.
+3. **Context-Aware AI Creator**: 21 actions aware of the entire 11-repository Knowledge Graph.
 4. **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
 5. **Folderless Database-First**: Dynamic metadata filtering replaces nested folder hierarchies.
