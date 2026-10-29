@@ -42,7 +42,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.2 COSYlanguages (`cosylanguages/COSYlanguages`)
-* **Responsibility**: Primary learning experience platform, study path orchestration, adaptive learning algorithms (SRS scheduling), course curriculum navigation, student streak tracking, lesson completion logic, and tutor/student study interactions.
+* **Responsibility**: Primary language learning application, study path orchestration, adaptive learning algorithms (SRS scheduling), course curriculum navigation, student streak tracking, lesson completion logic, and tutor/student study interactions.
 * **Owned Data**:
   * User Learning Profiles & Curriculum Preferences.
   * Spaced Repetition (SRS) Card States (e.g., SM-2 / Leitner intervals, ease factors, next review dates).
@@ -65,7 +65,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.3 COSYworld (`cosylanguages/COSYworld`)
-* **Responsibility**: 3D spatial rendering, avatar movement, spatial audio, real-time NPC interactions, location-based language quests, multiplayer spatial instances.
+* **Responsibility**: Immersive 3D spatial rendering, virtual environment engine, avatar movement, spatial audio, real-time NPC interactions, location-based language quests, multiplayer spatial instances.
 * **Owned Data**:
   * 3D Instance Session State & Player Coordinates.
   * Avatar Customization State & Cosmetic Inventories.
@@ -84,7 +84,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.4 COSYgames (`cosylanguages/COSYgames`)
-* **Responsibility**: Arcade micro-games, time-attack challenges, multiplayer competitive word games, global leaderboards, achievement unlock logic.
+* **Responsibility**: Arcade micro-games, time-attack challenges, multiplayer competitive word games, global leaderboards, matchmaking, achievement unlock logic.
 * **Owned Data**:
   * Micro-game Match Sessions & Real-time Game State.
   * High Score Tables & Leaderboard Rankings.
@@ -104,7 +104,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.5 COSYtools (`cosylanguages/COSYtools`)
-* **Responsibility**: Utility and productivity tooling: instant dictionary lookup, verb conjugation engines, text readability/CEFR analyzers, browser reading extensions, mobile companion widgets.
+* **Responsibility**: Utility suite and productivity tools: instant popup dictionary lookup, verb conjugation engines, text readability/CEFR difficulty analyzers, browser reading extensions, mobile companion widgets.
 * **Owned Data**:
   * Tool-Specific User Preferences & Quick-Bookmark Lists.
   * Analysis History Cache (e.g., user-submitted text analysis results).
@@ -140,7 +140,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.7 COSYmagazine (`cosylanguages/COSYmagazine`)
-* **Responsibility**: Digital publishing of cultural articles, podcasts, interviews, literary breakdowns, reader comments, issue curation.
+* **Responsibility**: Editorial publishing & digital cultural publication: cultural articles, audio podcasts, interviews, literary breakdowns, reader discussion forums, issue curation.
 * **Owned Data**:
   * Article Reader Comments & Reaction Counts.
   * Reader Article Bookmarks & Reading Position (Scroll % / Last Read Node).
@@ -158,7 +158,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.8 COSYevents (`cosylanguages/COSYevents`)
-* **Responsibility**: Management and delivery of live community events, webinars, speaking workshops, language exchange meetups, event scheduling, host streaming links, attendee ticketing.
+* **Responsibility**: Live community events, webinars, speaking workshops, language exchange meetups, event scheduling, host streaming links, attendee ticketing, WebRTC room orchestration.
 * **Owned Data**:
   * Event Schedules, Session Timings & Speaker Bios.
   * Event Registrations, RSVPs, Ticket Purchases & Attendance Logs.
@@ -178,7 +178,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.9 COSYplatform (`cosylanguages/COSYplatform`)
-* **Responsibility**: Core identity provider (IdP), central single sign-on (SSO), user profile management, tenancy, subscription & payment billing engine, global API gateway & rate limiting.
+* **Responsibility**: Ecosystem core platform infrastructure, Identity Provider (IdP), central single sign-on (SSO), user profile management, tenancy, subscription & payment billing engine, global API gateway & rate limiting.
 * **Owned Data**:
   * User Accounts, Auth Credentials, OAuth Tokens, MFA Keys.
   * Subscription Plans, Billing History, Payment Gateways (Stripe/Apple/Google).
@@ -216,7 +216,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 ---
 
 ### 1.11 COSYpractice (`cosylanguages/COSYpractice`)
-* **Responsibility**: Specialized interactive drill execution engine, pronunciation/speech practice, audio recording evaluation, speed flashcard runner, automated essay/writing grading.
+* **Responsibility**: Specialized interactive drill execution engine, active output practice, pronunciation/speech evaluation, speed flashcard runner, writing/essay grading execution.
 * **Owned Data**:
   * Practice Session Execution State (Current drill index, timer, temporary session score).
   * User Voice Recording Submissions & Speech-to-Text Transcripts.
@@ -261,7 +261,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
                     |                               |                               |
         +-----------v-----------+       +-----------v-----------+       +-----------v-----------+
         |     COSYlanguages     |       |     COSYpractice      |       |       COSYdata        |
-        |  (LMS / SRS Engine)   |       |  (Interactive Drills) |       | (Analytics / Telemetry|
+        |  (Main Learning App)  |       |  (Interactive Drills) |       | (Analytics / Telemetry|
         | Owns: SRS State,      |       | Owns: Practice Runs,  |       | Owns: Telemetry Logs, |
         | Course Progress       |       | User Voice Recordings |       | Data Lake, ML Models  |
         +-----------------------+       +-----------------------+       +-----------------------+

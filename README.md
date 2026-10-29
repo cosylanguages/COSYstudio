@@ -14,17 +14,17 @@ Content exists **once** in COSYstudio. Every other application references conten
 
 | Repository | Domain Responsibility | Data Owned | Consumes From COSYstudio |
 | :--- | :--- | :--- | :--- |
-| **COSYstudio** | Content Operating System (CMS, Localization, Assets) | Content Nodes, Media Manifests, Localization Keys, Taxonomy | Core Provider |
-| **COSYplatform** | Identity Provider (SSO), Auth, Billing & Gateway | User Auth Credentials, Billing & Subscription Plans | Localized legal strings & tier descriptions (`cid_loc_*`) |
-| **COSYlanguages** | Primary Learning Platform & Pedagogy Engine | User SRS state, Lesson progress, Course rosters | `ContentNode` by `cid`, UI Localizations |
-| **COSYpractice** | Interactive Drill Engine & Speech Evaluation | Practice session runs, Audio recording submissions | Drill definitions (`cid_drill_*`), Audio prompts & rubrics |
-| **COSYworld** | 3D Spatial Language Environment | Avatar cosmetics, Spatial instance state | NPC Dialogue trees, Quest scripts, Spatial Audio URLs |
-| **COSYgames** | Gamified Micro-Games & Interactive Challenges | Game sessions, High scores, Leaderboards | Gamepack bundles (`cid_gamepack_*`), Media |
-| **COSYtools** | Dictionaries, Analyzers, Browser Extensions | User tool preferences, Search cache | Direct dictionary query API, CEFR metadata |
-| **COSYdata** | Telemetry, Analytics, Data Lake & AI/ML Models | Behavioral telemetry logs, Trained ML models | Event streams (`content.published`), Tags |
-| **COSYmagazine** | Digital Culture Magazine & Editorial Publishing | Article comments, Reading bookmarks | Article content nodes (`cid_article_*`), Inline Vocab |
-| **COSYevents** | Live Webinars, Meetups & Workshops | Event schedules, RSVPs, Tickets, WebRTC rooms | Event material bundles (`cid_eventpack_*`), Media |
-| **COSYmanuals** | User Documentation, Onboarding & Help Desk | Support help tickets, Vote ratings | Documentation articles (`cid_manual_*`), Tooltips |
+| **COSYstudio** | Central Content Operating System (CMS, Localization, Asset Pipelines) | Content Nodes, Media Manifests, Localization Keys, Taxonomy | Core Provider |
+| **COSYplatform** | Central Identity Provider (SSO), Auth, Billing & Global API Gateway | User Auth Credentials, Billing & Subscription Plans | Localized legal strings & tier descriptions (`cid_loc_*`) |
+| **COSYlanguages** | Primary Language Learning Application & SRS Pedagogy Engine | User SRS card states, Lesson progress, Course rosters | `ContentNode` by `cid`, UI Localizations |
+| **COSYpractice** | Specialized Interactive Drill Engine & Speech Evaluation | Practice session runs, Audio recording submissions | Drill definitions (`cid_drill_*`), Audio prompts & rubrics |
+| **COSYworld** | Immersive 3D Spatial Language Environment Engine | Avatar cosmetics, Spatial instance state | NPC Dialogue trees, Quest scripts, Spatial Audio URLs |
+| **COSYgames** | Gamified Micro-Games, Matchmaking & Arcade Engine | Game sessions, High scores, Leaderboards | Gamepack bundles (`cid_gamepack_*`), Media |
+| **COSYtools** | Utility Tools: Dictionaries, CEFR Analyzers, Extensions | User tool preferences, Search cache | Direct dictionary query API, CEFR metadata |
+| **COSYdata** | Telemetry Ingestion, Data Lakehouse & AI/ML Pipelines | Behavioral telemetry logs, Trained ML models | Event streams (`content.published`), Taxonomy Tags |
+| **COSYmagazine** | Editorial Publishing & Digital Cultural Publication | Article comments, Reading bookmarks | Article content nodes (`cid_article_*`), Inline Vocab |
+| **COSYevents** | Live Webinars, Workshops, Meetups & WebRTC Rooms | Event schedules, RSVPs, Tickets, WebRTC tokens | Event material bundles (`cid_eventpack_*`), Media |
+| **COSYmanuals** | User Guides, App Documentation & Support Help Center | Support help tickets, Vote ratings | Documentation articles (`cid_manual_*`), Tooltips |
 
 ## Architectural Documentation
 
