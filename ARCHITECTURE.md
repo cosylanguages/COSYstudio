@@ -18,13 +18,174 @@ Instead, COSYstudio implements a **Database-First Content Architecture**:
 
 ---
 
-## 1. Educational Content Knowledge Graph & Non-Duplication Architecture
+## 1. Integrated AI Assistant Architecture & Ecosystem Intelligence
+
+COSYstudio features a native **Integrated AI Assistant** that acts as an intelligent co-creator for instructional designers, linguists, and authors.
+
+### 1.1 Deep Cross-Repository Context Understanding
+
+The AI Assistant does not generate text in isolation. It maintains full real-time context awareness of the entire 11-repository Knowledge Graph:
+
+* **`COSYdata`**: Reads master vocabulary definitions, IPA transcriptions with regional variants (`uk`, `us`, `ca`, `au`, `nz`), and `schemas/themes.json` taxonomy.
+* **`COSYmanuals`**: Understands CEFR level curriculum roadmaps (`curriculums/<iso>/<track>/<LEVEL>.json`), CCQ check requirements, and grammar manual structures.
+* **`COSYpractice`**: Analyzes student exercise failure rates and weak-spot telemetry to generate targeted remediation drills.
+* **`COSYworld`**: Understands COSY Town RPG quest constraints, character profiles (James York, Ella Bronx, Anna), and district coordinates.
+* **`COSYmagazine`**: Understands editorial article formats, flipbook layouts, and podcast script requirements.
+* **`COSYevents`**: Generates speaking-club prompt decks and masterclass discussion outlines.
+* **`COSYtools`**: Leverages verb conjugation and noun declension rules for morphologically accurate distractors.
+
+```
++---------------------------------------------------------------------------------------------------------+
+|                                  COSYstudio INTEGRATED AI ASSISTANT                                     |
++---------------------------------------------------------------------------------------------------------+
+|                                    CONTEXT-AWARE KNOWLEDGE GRAPH                                        |
+|  * COSYdata Lexicon  * COSYmanuals Curriculums  * COSYpractice Weak Spots  * COSYworld RPG Quests     |
++---------------------------------------------------------------------------------------------------------+
+|                                        21 AI ASSISTANT ACTIONS                                          |
+|  [1] Generate Lesson      [2] Improve Lesson      [3] Simplify            [4] Increase CEFR             |
+|  [5] Translate            [6] Generate Vocab      [7] Generate Examples   [8] Generate IPA              |
+|  [9] Generate Pronun.     [10] Generate Quiz      [11] Generate Discussion[12] Generate Homework        |
+|  [13] Generate Article    [14] Generate Worksheet [15] Generate Listening [16] Generate TTS           |
+|  [17] Generate Images     [18] Generate Dialogue  [19] Generate Roleplay  [20] Generate Cultural Notes  |
+|  [21] Generate Metadata                                                                                 |
++---------------------------------------------------------------------------------------------------------+
+```
+
+---
+
+### 1.2 Comprehensive 21 AI Assistant Actions
+
+Below are the 21 native AI Assistant actions integrated into the COSYstudio command bar (`Cmd+K`) and block inspector drawers:
+
+#### 1. Generate Lesson
+* **Trigger**: `/ai generate-lesson` or `Cmd+K` -> "Generate Lesson on [Topic]".
+* **Output**: Assembles a multi-block Notion-style lesson (`cid_lesson_*`) containing heading, rich text, vocabulary table, grammar explanation, gap-fill exercise, and teacher notes.
+* **Context Binding**: Automatically queries `COSYmanuals` curriculum maps and `COSYdata` vocabulary pools for target CEFR level.
+
+#### 2. Improve Lesson
+* **Trigger**: Click "Improve Lesson" in Lesson Builder inspector drawer.
+* **Output**: Scans current lesson blocks for pedagogical flow, suggests missing CCQ checks, replaces weak example sentences, and adds interactive exercise blocks.
+
+#### 3. Simplify
+* **Trigger**: Select text / block -> "Simplify to CEFR A2".
+* **Output**: Rewrites text using vocabulary and grammar rules constrained strictly to the lower target CEFR level without losing core meaning.
+
+#### 4. Increase CEFR
+* **Trigger**: Select text / block -> "Increase CEFR to B2/C1".
+* **Output**: Enhances vocabulary with idiomatic expressions, complex sentence structures, and advanced grammatical forms (e.g. subjunctive mood).
+
+#### 5. Translate
+* **Trigger**: `/ai translate` across multi-target language matrix.
+* **Output**: Generates high-accuracy, context-aware translations across 14 ISO languages (`en`, `fr`, `it`, `ru`, `el`, `es`, `de`, `pt`, `hy`, `ka`, `ba`, `br`, `cv`, `tt`) while preserving localization keys (`titleLocKey`).
+
+#### 6. Generate Vocabulary
+* **Trigger**: Highlight text -> "Extract & Generate Vocabulary".
+* **Output**: Creates canonical `Vocabulary` Content Objects (`cid_vocab_*`) with headword, part of speech, grammatical gender, definitions, and translations.
+
+#### 7. Generate Examples
+* **Trigger**: Select vocabulary item -> "Generate 3 Contextual Example Sentences".
+* **Output**: Produces CEFR-aligned example sentences demonstrating correct usage in realistic scenarios.
+
+#### 8. Generate IPA
+* **Trigger**: Select term -> "Generate IPA Phonetics".
+* **Output**: Generates primary IPA transcription and regional IPA variants (`uk`, `us`, `ca`, `au`, `nz`).
+
+#### 9. Generate Pronunciation
+* **Trigger**: Select IPA / sentence -> "Generate Pronunciation Drill".
+* **Output**: Creates a `Pronunciation` block (`cid_drill_*`) with target audio waveform and expected speech-to-text transcript.
+
+#### 10. Generate Quiz
+* **Trigger**: Select lesson / vocabulary pool -> "Generate 5-Question Quiz".
+* **Output**: Creates a `Quiz` Content Object (`cid_quiz_*`) containing multiple choice, gap-fill, and reordering questions with plausible distractors generated from `COSYtools` conjugation/declension tables.
+
+#### 11. Generate Discussion
+* **Trigger**: `/ai generate-discussion`.
+* **Output**: Generates communicative speaking-club prompts, debate questions, and opinion triggers for `COSYevents`.
+
+#### 12. Generate Homework
+* **Trigger**: `/ai generate-homework`.
+* **Output**: Produces a `Homework` assignment block with instructions, completion checklist, and linked review flashcards.
+
+#### 13. Generate Article
+* **Trigger**: `/ai generate-article`.
+* **Output**: Drafts a short, cultural, speaking-first article formatted for `COSYmagazine` with embedded vocabulary popups and sentence frames.
+
+#### 14. Generate Worksheet
+* **Trigger**: `/ai generate-worksheet`.
+* **Output**: Compiles a printable PDF reference worksheet layout (`cid_worksheet_*`) for `COSYmanuals` print booklets.
+
+#### 15. Generate Listening
+* **Trigger**: `/ai generate-listening`.
+* **Output**: Drafts a listening comprehension script, attaches neural TTS audio (`cid_media_*`), and generates timestamped comprehension questions.
+
+#### 16. Generate TTS
+* **Trigger**: Select text -> "Generate High-Fidelity Neural TTS Audio".
+* **Output**: Synthesizes native speaker neural audio, uploads to CDN, creates a `Media` object (`cid_media_*`), and attaches word-level force alignment JSON (`.vtt`).
+
+#### 17. Generate Images
+* **Trigger**: Select vocabulary / story -> "Generate Illustrative Image".
+* **Output**: Invokes text-to-image AI pipeline to generate a clean, educational illustration (`cid_image_*`), sets localized alt text, and attaches to block.
+
+#### 18. Generate Dialogue
+* **Trigger**: `/ai generate-dialogue`.
+* **Output**: Creates a multi-turn `Dialogue` block between two speakers with natural conversational turns and audio bindings.
+
+#### 19. Generate Roleplay
+* **Trigger**: `/ai generate-roleplay`.
+* **Output**: Creates an interactive `AI Discussion` roleplay scenario (e.g. *Barista at COSY Cafe*, *Hotel Receptionist*) for `COSYworld` RPG quests.
+
+#### 20. Generate Cultural Notes
+* **Trigger**: Select topic -> "Generate Cultural & Pragmatic Notes".
+* **Output**: Produces pragmatic usage callouts, cultural context notes, and etiquette warnings.
+
+#### 21. Generate Metadata
+* **Trigger**: `/ai generate-metadata`.
+* **Output**: Analyzes any raw text/lesson, estimates difficulty score (1-100), assigns CEFR level (`A0`–`C2`), taxonomy theme/sub-theme, targeted skill tags, age groups, and Bloom taxonomy learning objectives.
+
+---
+
+### 1.3 End-to-End AI Generation & Human-in-the-Loop Workflow
+
+The workflow below illustrates how the AI Assistant collaborates with authors to generate, review, auto-link, and publish content objects:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Author as Content Author / Linguist
+    participant StudioUI as COSYstudio UI / Command Bar
+    participant AIAssistant as Integrated AI Assistant
+    participant KnowledgeGraph as Ecosystem Knowledge Graph
+    participant StudioCore as COSYstudio Core Service
+    participant EdgeCDN as Global Edge CDN
+
+    Author->>StudioUI: Command: /ai generate-lesson (Topic: "Ordering Coffee in French", CEFR: A2)
+    StudioUI->>AIAssistant: Trigger Action: Generate Lesson
+
+    Note over AIAssistant, KnowledgeGraph: 1. Cross-Repository Context Resolution
+    AIAssistant->>KnowledgeGraph: Query COSYdata (A2 French Vocab) & COSYmanuals (A2 Curriculum Tracks)
+    KnowledgeGraph-->>AIAssistant: Return Vocab CIDs ("café", "lait", "addition") & Grammar Rules
+
+    Note over AIAssistant: 2. Generation & Auto-Linking
+    AIAssistant->>AIAssistant: Draft Lesson Blocks + Synthesize TTS Audio + Generate Gap-Fill Exercises
+    AIAssistant-->>StudioUI: Render Draft Lesson Canvas with Live AI Inspector Annotations
+
+    Note over Author: 3. Human-in-the-Loop Review
+    Author->>StudioUI: Review AI Draft -> Tweak Example Sentence & Confirm CEFR Metadata
+    Author->>StudioUI: Click "Approve & Publish to Staging"
+
+    StudioUI->>StudioCore: Save Atomic RLOs (cid_vocab_*, cid_exercise_*, cid_lesson_*)
+    StudioCore->>KnowledgeGraph: Register Graph Edges (CONTAINS, EXERCISES, REFERENCES_MEDIA)
+    StudioCore->>EdgeCDN: Deploy Payload to Global Edge CDN
+    EdgeCDN-->>Consumer: Instant Auto-Propagation across COSYlanguages, COSYgames, COSYworld
+```
+
+---
+
+## 2. Educational Content Knowledge Graph & Non-Duplication Architecture
 
 In COSYstudio, lessons, games, articles, and assessments **never duplicate information**. Every composite entity is a node in a **Directed Educational Knowledge Graph** that references canonical atomic objects by Content Identifiers (`cid_*`).
 
-### 1.1 Knowledge Graph Node Hierarchy
-
-The Knowledge Graph connects atomic learning objects into higher-level composite structures through typed relational edges:
+### 2.1 Knowledge Graph Node Hierarchy
 
 ```
                           [ LESSON CONTAINER ]
@@ -44,24 +205,7 @@ The Knowledge Graph connects atomic learning objects into higher-level composite
      [ FLASHCARD CARD ]                          [ PRONUNCIATION DRILL ]
 ```
 
-#### Node Hierarchy Flow:
-1. **Lesson (`cid_lesson_*`)**: Top-level composition container assembling learning sequences.
-2. **Vocabulary (`cid_vocab_*`)**: Canonical headword term, IPA phonetics, and translation definitions.
-3. **Grammar (`cid_gram_*`)**: Structural rule explanations, form-meaning-use formulas, and CCQ checks.
-4. **Articles (`cid_article_*`)**: Cultural reads and magazine posts embedding vocabulary/grammar nodes.
-5. **Games (`cid_gamepack_*`)**: Game prompt pools for `COSYgames` referencing target vocabulary/grammar.
-6. **Quests (`cid_quest_*`)**: Open-world 3D NPC dialogue trees in `COSYworld` referencing dialogue/vocab.
-7. **Exercises (`cid_exercise_*`)**: Interactive practice blocks (gap-fill, sorting, matching) referencing target terms.
-8. **Media (`cid_media_*`)**: Audio snippets, native voice tracks, video manifests, 3D models.
-9. **Assessments (`cid_quiz_*`)**: Graded evaluation items referencing exercises and rubrics.
-10. **Flashcards (`cid_card_*`)**: Memory review cards referencing vocabulary/grammar CIDs.
-11. **Pronunciation (`cid_drill_*`)**: Speech evaluation targets referencing target IPA and audio assets.
-
----
-
-### 1.2 Knowledge Graph Relationship Types
-
-Relational edges between Knowledge Graph nodes are strictly typed:
+### 2.2 Knowledge Graph Relationship Types
 
 | Relationship Type | Direction | Description & Example |
 | :--- | :--- | :--- |
@@ -76,7 +220,7 @@ Relational edges between Knowledge Graph nodes are strictly typed:
 
 ---
 
-## 2. Automatic Update Propagation Engine
+## 3. Automatic Update Propagation Engine
 
 Because downstream applications (`COSYlanguages`, `COSYgames`, `COSYworld`, `COSYpractice`, `COSYmagazine`) reference canonical `cid_*` keys rather than embedding copies, **updating a single canonical object automatically updates every downstream consumer.**
 
@@ -94,57 +238,22 @@ Suppose an editor updates the canonical vocabulary node `cid_vocab_9021` ("El Cu
    * **Worksheets & Print Booklets** in `COSYmanuals` re-render with corrected translation keys.
    * **Flashcards & Drills** in `COSYpractice` update speech evaluation targets.
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Editor as Content Editor
-    participant Studio as COSYstudio Core
-    participant EventBus as NATS / Kafka Event Bus
-    participant EdgeCDN as Global Edge CDN / Redis
-    participant LangApp as COSYlanguages
-    participant GameApp as COSYgames
-    participant WorldApp as COSYworld
-    participant MagApp as COSYmagazine
-
-    Editor->>Studio: Update Canonical Vocab (cid_vocab_9021: New Audio + Definition)
-    Studio->>Studio: Validate Schema & Bump Version (cid_vocab_9021@1.2.0)
-    Studio->>EventBus: Broadcast Event: content.updated { cid: "cid_vocab_9021", version: "1.2.0" }
-
-    EventBus-->>EdgeCDN: Invalidate Cache for cid_vocab_9021
-    EdgeCDN->>EdgeCDN: Re-fetch & Populate Normalized JSON Payload
-
-    EventBus-->>LangApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
-    EventBus-->>GameApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
-    EventBus-->>WorldApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
-    EventBus-->>MagApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
-
-    Note over LangApp, MagApp: Every Lesson, Game, Quest, and Article is automatically updated!
-```
-
 ---
 
-## 3. Versioning & Dependency Governance Strategy
+## 4. Versioning & Dependency Governance Strategy
 
-To ensure seamless content updates without breaking active student sessions or consumer API contracts, COSYstudio enforces strict versioning rules.
-
-### 3.1 Versioning Contracts: Immutable Versions vs Dynamic Aliasing
+### 4.1 Versioning Contracts: Immutable Versions vs Dynamic Aliasing
 
 * **Immutable Version Identifiers (`cid@version`)**: Every version of a content object is immutable (e.g. `cid_vocab_9021@1.0.0`, `cid_vocab_9021@1.1.0`).
 * **Dynamic Pointer Aliases (`@latest`, `@staging`, `@production`)**: Downstream applications query dynamic aliases (e.g. `cid_vocab_9021@production`).
 * **SemVer Propagation Rules**:
-  * **PATCH (`1.0.0` -> `1.0.1`)**: Typo fixes, definition refinement, minor audio re-recording. **Auto-propagates instantly** to `@production` alias.
-  * **MINOR (`1.0.0` -> `1.1.0`)**: Additive non-breaking changes (new example sentence, additional regional IPA variant). **Auto-propagates instantly** to `@production` alias.
-  * **MAJOR (`1.0.0` -> `2.0.0`)**: Structural breaking changes (part of speech change, complete headword restructuring). **Does NOT auto-propagate to `@production`**. Creates a new major version pointer, requiring author review and migration approval in downstream lessons.
-
-### 3.2 Graph Dependency Impact Analysis & Rollback Safety
-
-Before publishing a major update or deprecating an object, COSYstudio performs a **Graph Dependency Impact Analysis**:
-* The right Inspector Drawer displays all downstream dependencies (`Reused In: 14 Lessons, 3 Games, 2 Quests`).
-* **Emergency Rollback**: If an update contains an issue, the author clicks *"Rollback Alias"*, instantly pointing `cid_vocab_9021@production` back to `v1.1.0` across the global Edge CDN in <15ms.
+  * **PATCH (`1.0.0` -> `1.0.1`)**: Typo fixes, definition refinement. **Auto-propagates instantly** to `@production` alias.
+  * **MINOR (`1.0.0` -> `1.1.0`)**: Additive non-breaking changes (new example sentence, regional IPA variant). **Auto-propagates instantly** to `@production` alias.
+  * **MAJOR (`1.0.0` -> `2.0.0`)**: Structural breaking changes. **Does NOT auto-propagate to `@production`**. Creates a new major version pointer, requiring author review and migration approval in downstream lessons.
 
 ---
 
-## 4. High-Level Ecosystem Architecture Diagram
+## 5. High-Level Ecosystem Architecture Diagram
 
 ```
 +--------------------------------------------------------------------------------------------------------+
@@ -197,7 +306,7 @@ Before publishing a major update or deprecating an object, COSYstudio performs a
 
 ---
 
-## 5. Notion-Style Visual Lesson Builder & JSON Block Engine
+## 6. Notion-Style Visual Lesson Builder & JSON Block Engine
 
 COSYstudio features a modern, drag-and-drop **Visual Lesson Builder** operating on 100% native JSON document trees (**Zero XML**).
 
@@ -209,7 +318,7 @@ COSYstudio features a modern, drag-and-drop **Visual Lesson Builder** operating 
 
 ---
 
-## 6. Unified Content Object Model & Metadata Schema
+## 7. Unified Content Object Model & Metadata Schema
 
 Every entity in COSYstudio inherits from the base `ContentObject` schema.
 
@@ -249,7 +358,7 @@ export interface ContentObjectMetadata {
 
 ---
 
-## 7. Entity Relationship Diagrams (ERDs)
+## 8. Entity Relationship Diagrams (ERDs)
 
 ```mermaid
 erDiagram
@@ -311,7 +420,7 @@ erDiagram
 
 ---
 
-## 8. Data Ownership Matrix (11 Ecosystem Repositories)
+## 9. Data Ownership Matrix (11 Ecosystem Repositories)
 
 | Data Entity / Domain | studio | platform | languages | world | games | tools | data | magazine | events | manuals | practice |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -335,81 +444,81 @@ erDiagram
 
 ---
 
-## 9. Verified Repository Boundary Analysis (11 Repositories)
+## 10. Verified Repository Boundary Analysis (11 Repositories)
 
 Below is the definitive boundary analysis for all 11 repositories in the `cosylanguages/` organization answering all 5 core questions per repository.
 
-### 9.1 COSYstudio (`cosylanguages/COSYstudio`)
+### 10.1 COSYstudio (`cosylanguages/COSYstudio`)
 * **Responsibility**: Central Content Operating System (COS). Single source of truth for authoring, versioning, localization, asset transcoding, and edge RLO distribution.
 * **Data Owned**: Canonical Content Objects (`cid_*`), Media Manifests, Localization Master Keys, Taxonomy Trees, Version History Logs.
 * **Data It Must NEVER Own**: Student Enrollments, Paid Classroom Sessions, Private Student Data, SRS States, Event Registrations.
 * **Exposed APIs**: `Content Query API` (GraphQL/gRPC/REST), `Content Authoring API`, `Search & Taxonomy Index API`, `Content Event Stream` (Kafka/NATS).
 * **Consumed APIs from COSYstudio**: N/A (Core Provider).
 
-### 9.2 COSYdata (`cosylanguages/COSYdata`)
+### 10.2 COSYdata (`cosylanguages/COSYdata`)
 * **Responsibility**: Canonical machine-readable data repository and vocabulary hub serving dictionary datasets (`vocabulary/<lang>/`) and taxonomy schemas (`schemas/themes.json`) across 14 ISO languages.
 * **Data Owned**: Standardized Vocabulary JSON Entries (`A0`–`C2`), IPA Transcriptions, Dialect Variants, `schemas/themes.json`, Index Artifacts (`index.json`, `flat-index.json`).
 * **Data It Must NEVER Own**: Student SRS Intervals, User Credentials, Quiz Performance Scores.
 * **Exposed APIs**: Static CDN REST Endpoints (`vocabulary/<lang>/<level>/<theme>.json`), `vocab-resolver.js`, `cosy-word-popup.js`.
 * **Consumed APIs from COSYstudio**: Ingests published vocabulary RLOs, IPA definitions, and taxonomy trees from `content.published` event stream.
 
-### 9.3 COSYplatform (`cosylanguages/COSYplatform`)
+### 10.3 COSYplatform (`cosylanguages/COSYplatform`)
 * **Responsibility**: Web application for students, teachers, and founder providing authentication, student hub, paid course execution, and online virtual classroom.
 * **Data Owned**: User Accounts, Auth Credentials, OAuth Tokens, Classroom State, Paid Course Enrollments, Private Student Progress (Supabase).
 * **Data It Must NEVER Own**: Public Vocabulary Master Data, Dictionaries, Offline Booklet Reference Materials.
 * **Exposed APIs**: `Classroom Service API`, `Student Progress API`.
 * **Consumed APIs from COSYstudio**: Fetches structured lesson block templates and RLO schemas by `cid` for live classroom rendering.
 
-### 9.4 COSYlanguages (`cosylanguages/COSYlanguages`)
+### 10.4 COSYlanguages (`cosylanguages/COSYlanguages`)
 * **Responsibility**: Free public front door, landing portal, language hubs, course catalogue, placement quiz, price calculator, and hybrid community pages.
 * **Owned Data**: Portal Page UI State, Interface Translations (`data/ui/<lang>.json`), `config.js` Registry, Placement Quiz Logic.
 * **Data It Must NEVER Own**: Master Vocabulary Datasets, User Auth Credentials, Private Classrooms.
 * **Exposed APIs**: Static Web Portal Pages & Client Navigation Engine.
 * **Consumed APIs from COSYstudio**: Fetches course catalog metadata, localized UI descriptors, and placement quiz RLOs.
 
-### 9.5 COSYpractice (`cosylanguages/COSYpractice`)
+### 10.5 COSYpractice (`cosylanguages/COSYpractice`)
 * **Responsibility**: Free interactive practice exercise engine for vocabulary, grammar, and speaking (`en`, `fr`, `it`, `ru`, `el`) with SRS reviews and daily challenges.
 * **Owned Data**: Browser LocalStorage SRS Memory State, Practice Session Scores, Weak Spot Indicators, Progress Dashboard Metrics.
 * **Data It Must NEVER Own**: Master Vocabulary JSON Files, Master Grammar Explanations, CCQ Rule Documents.
 * **Exposed APIs**: Client-side practice engine (`_engine/`) and progress dashboard (`progress-dashboard.html`).
 * **Consumed APIs from COSYstudio**: Dynamically fetches vocabulary RLOs, grammar exercise blocks, and CCQ prompts by `cid`.
 
-### 9.6 COSYtools (`cosylanguages/COSYtools`)
+### 10.6 COSYtools (`cosylanguages/COSYtools`)
 * **Responsibility**: Offline-first, client-side language reference suite (verb conjugators, noun gender/case declension, case matrices) across 14 languages.
 * **Owned Data**: Tool Datasets (`tools/<lang>/<tool>/data/`), Sharded Dictionaries, `catalog.json` Inventory.
 * **Data It Must NEVER Own**: Student Course Enrollments, Classroom Telemetry, User Auth Tokens.
 * **Exposed APIs**: Deep-Linking Query Interfaces (`?verb=<lemma>`, `?noun=<word>`, `?q=<keyword>`).
 * **Consumed APIs from COSYstudio**: Reads canonical headwords, conjugation tables, and grammatical rules.
 
-### 9.7 COSYgames (`cosylanguages/COSYgames`)
+### 10.7 COSYgames (`cosylanguages/COSYgames`)
 * **Responsibility**: Suite of 20 interactive standalone language games for communicative fluency and vocabulary practice.
 * **Owned Data**: Game Match State, Active Session Scores, Local High Score History.
 * **Data It Must NEVER Own**: Master Dictionaries, User Accounts, Pedagogical Progress Tracking.
 * **Exposed APIs**: Client-side game runners (HTML5 / ES6 Modules).
 * **Consumed APIs from COSYstudio**: Fetches mini-game content bundles (`cid_gamepack_*`).
 
-### 9.8 COSYevents (`cosylanguages/COSYevents`)
+### 10.8 COSYevents (`cosylanguages/COSYevents`)
 * **Responsibility**: Public calendar directory and session material repository (speaking club decks, cinema guides, masterclasses).
 * **Owned Data**: Event Definitions (`events/<slug>/event.json`), Session JSONs (`events/<slug>/sessions/<slug>.json`), Calendar Index (`public-events.json`).
 * **Data It Must NEVER Own**: Private Classroom Sessions, User Auth Secrets, Paid Course Enrollments.
 * **Exposed APIs**: Static Calendar Directory (`index.html`, `public-events.json`).
 * **Consumed APIs from COSYstudio**: Fetches session prompt decks (`cid_eventpack_*`), event descriptions, and media assets.
 
-### 9.9 COSYmanuals (`cosylanguages/COSYmanuals`)
+### 10.9 COSYmanuals (`cosylanguages/COSYmanuals`)
 * **Responsibility**: Public catalog and gated learning portal holding manuals, teacher guides, student workbooks, and print booklets across 13 ISO languages + Chuvash.
 * **Owned Data**: Public Manual Catalog Metadata (`catalog/*.json`), Curriculum Maps (`curriculums/<iso>/<track>/<LEVEL>.json`), Gated Body Text (Supabase), Printable Booklet Layouts.
 * **Data It Must NEVER Own**: Master Vocabulary Datasets, Live Classroom Session State.
 * **Exposed APIs**: Public Catalog Manifest (`catalog/manifest.json`), Manual Viewers.
 * **Consumed APIs from COSYstudio**: Fetches documentation nodes (`cid_manual_*`), grammar rule explanations, and vocabulary sets.
 
-### 9.10 COSYmagazine (`cosylanguages/COSYmagazine`)
+### 10.10 COSYmagazine (`cosylanguages/COSYmagazine`)
 * **Responsibility**: Short speaking-first digital publication (articles, sentence frames, podcasts) with flipbook and stage presentation modes (`?stage=1`, `?script=1`).
 * **Owned Data**: Editorial Article JSON Posts (`posts/*.json`), Podcast Feed (`podcast.xml`), Generated Static HTML Pages, Newsstand Index (`posts.json`).
 * **Data It Must NEVER Own**: Embedded Master Dictionary Definitions.
 * **Exposed APIs**: Newsstand Interface (`index.html`), RSS Podcast Feed (`podcast.xml`).
 * **Consumed APIs from COSYstudio**: Fetches article content nodes (`cid_article_*`), inline vocabulary popups, and podcast audio assets.
 
-### 9.11 COSYworld (`cosylanguages/COSYworld`)
+### 10.11 COSYworld (`cosylanguages/COSYworld`)
 * **Responsibility**: Standalone open-world RPG for direct language immersion in COSY Town across 14 target languages (character selection: James York, Ella Bronx, Anna).
 * **Owned Data**: COSY Town Hotspots, RPG Instance State, Player Citizen Level, XP, COSY Passport Progress Saves (LocalStorage / JSON).
 * **Data It Must NEVER Own**: Master Dictionary & Grammar Rules.
@@ -418,7 +527,7 @@ Below is the definitive boundary analysis for all 11 repositories in the `cosyla
 
 ---
 
-## 10. Shared Packages (`@cosy/*`) & Governance
+## 11. Shared Packages (`@cosy/*`) & Governance
 
 To guarantee type safety, consistent content referencing, and schema validation across all 11 repositories, shared packages are maintained in the `@cosy/` registry.
 
@@ -438,7 +547,7 @@ To guarantee type safety, consistent content referencing, and schema validation 
 
 ---
 
-## 11. Migration Strategy
+## 12. Migration Strategy
 
 Migrating existing applications across all 11 repositories to the strict COSYstudio COS architecture follows a 5-phase zero-downtime plan.
 
@@ -452,7 +561,8 @@ Migrating existing applications across all 11 repositories to the strict COSYstu
 
 ## Conclusion
 
-By combining a Notion-style Visual Lesson Builder, 24 extensible block primitives, 100% JSON internal contracts (zero XML), real-time collaboration (Yjs CRDTs), an Educational Content Knowledge Graph, and a database-first folderless Content Operating System:
+By combining an Integrated AI Assistant with 21 native actions, a Notion-style Visual Lesson Builder, 24 extensible block primitives, 100% JSON internal contracts (zero XML), real-time collaboration (Yjs CRDTs), an Educational Content Knowledge Graph, and a database-first folderless Content Operating System:
+* **Context-Aware AI Creator**: 21 actions aware of the entire 11-repository Knowledge Graph.
 * **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
 * **Knowledge Graph Non-Duplication**: Content exists once in `COSYstudio` and is referenced via `cid`.
 * **Automatic Update Propagation**: Updating one canonical object automatically updates every downstream lesson, game, article, and quest in real-time.

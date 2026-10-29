@@ -12,6 +12,14 @@ Designed as a modern, high-velocity database-first creator application inspired 
 
 Everything in COSYstudio is an atomic **Content Object (`ContentObject`)** identified by an immutable Content Identifier (`cid`). Dynamic database filtering and Airtable-like views replace traditional folder trees.
 
+## Integrated AI Assistant (21 Native Actions)
+
+COSYstudio features a native **Integrated AI Assistant** with real-time context awareness across all 11 ecosystem repositories:
+
+- **21 Native AI Actions**: Generate lesson, Improve lesson, Simplify, Increase CEFR, Translate, Generate vocabulary, Generate examples, Generate IPA, Generate pronunciation, Generate quiz, Generate discussion, Generate homework, Generate article, Generate worksheet, Generate listening, Generate TTS, Generate images, Generate dialogue, Generate roleplay, Generate cultural notes, Generate metadata.
+- **Cross-Repository Context Engine**: Queries `COSYdata` lexicon, `COSYmanuals` curriculums, `COSYpractice` telemetry, `COSYworld` RPG quests, `COSYmagazine` articles, and `COSYtools` conjugators.
+- **Human-in-the-Loop Review**: Authors review, edit, and approve candidate RLOs before edge CDN publishing and auto-linking.
+
 ## Educational Content Knowledge Graph & Automatic Propagation
 
 COSYstudio structures all content as a **Directed Knowledge Graph**:
@@ -22,7 +30,7 @@ Lesson -> Vocabulary -> Grammar -> Articles -> Games -> Quests -> Exercises -> M
 
 - **Zero Information Duplication**: Lessons, articles, games, and quests reference canonical `cid_*` objects instead of copying content.
 - **Automatic Propagation**: Updating a single vocabulary word or grammar rule automatically updates every downstream lesson, game, worksheet, quest, and article using that word across the entire ecosystem via event bus broadcasts and edge CDN invalidation.
-* **SemVer & Alias Versioning**: Dynamic pointers (`@latest`, `@production`) auto-propagate non-breaking patch/minor updates while pinning breaking structural major changes (`v2.0.0`) for manual author review.
+- **SemVer & Alias Versioning**: Dynamic pointers (`@latest`, `@production`) auto-propagate non-breaking patch/minor updates while pinning breaking structural major changes (`v2.0.0`) for manual author review.
 
 ## Visual Lesson Builder & Block-Based Engine
 
@@ -64,7 +72,7 @@ COSYstudio consists of 12 modern, integrated modules engineered for high-scale R
 8. **Assessment Builder**: Dynamic test generator, question variant transformer, and IRT difficulty calibrator.
 9. **Publishing**: Multi-environment deployment pipeline (`DRAFT` -> `STAGING` -> `PRODUCTION`) with instant CDN cache invalidation.
 10. **Analytics**: RLO Performance Index tracking exercise failure rates, drop-offs, and pedagogical effectiveness.
-11. **AI Assistant**: Auto-generator for contextual sentences, CEFR estimator, and automated translator.
+11. **AI Assistant**: Auto-generator for contextual sentences, CEFR estimator, and automated translator with 21 actions.
 12. **Settings**: Role-based access control (RBAC), localization locales, webhooks, and schema contracts.
 
 ## Architectural Documentation
@@ -72,22 +80,23 @@ COSYstudio consists of 12 modern, integrated modules engineered for high-scale R
 For complete detailed specifications, diagrams, matrices, shared schemas, and migration strategies, please refer to:
 
 - 📖 **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Full Principal Architect specification document.
-  - **Section 1**: Educational Content Knowledge Graph & Non-Duplication Architecture
-  - **Section 2**: Automatic Update Propagation Engine
-  - **Section 3**: Versioning & Dependency Governance Strategy
-  - **Section 4**: High-Level Ecosystem Architecture Diagram
-  - **Section 5**: Visual Lesson Builder & 100% JSON Block Engine (Zero XML)
-  - **Section 6**: Unified Content Object Model & Standardized Metadata
-  - **Section 7**: Entity Relationship Diagrams (ERDs)
-  - **Section 8**: Data Ownership Matrix (11 Repositories x Domains)
-  - **Section 9**: Verified Repository Boundary Analysis (11 Repositories)
-  - **Section 10**: Shared Packages (`@cosy/*`) & Governance
-  - **Section 11**: 5-Phase Zero-Downtime Migration Strategy
+  - **Section 1**: Integrated AI Assistant Architecture & 21 Native Actions
+  - **Section 2**: Educational Content Knowledge Graph & Non-Duplication Architecture
+  - **Section 3**: Automatic Update Propagation Engine
+  - **Section 4**: Versioning & Dependency Governance Strategy
+  - **Section 5**: High-Level Ecosystem Architecture Diagram
+  - **Section 6**: Visual Lesson Builder & 100% JSON Block Engine (Zero XML)
+  - **Section 7**: Unified Content Object Model & Standardized Metadata
+  - **Section 8**: Entity Relationship Diagrams (ERDs)
+  - **Section 9**: Data Ownership Matrix (11 Repositories x Domains)
+  - **Section 10**: Verified Repository Boundary Analysis (11 Repositories)
+  - **Section 11**: Shared Packages (`@cosy/*`) & Governance
+  - **Section 12**: 5-Phase Zero-Downtime Migration Strategy
 
 ## Guiding Architectural Axioms
 
-1. **Knowledge Graph Non-Duplication**: Content exists once in `COSYstudio` and is referenced via `cid`.
-2. **Automatic Propagation**: Updating a canonical object automatically updates every downstream app and lesson.
-3. **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
-4. **Folderless Database-First**: Dynamic metadata filtering replaces nested folder hierarchies.
-5. **Decoupled Identity (`cid`)**: Downstream applications store only immutable content IDs (`cid_*`).
+1. **Context-Aware AI Creator**: 21 actions aware of the entire 11-repository Knowledge Graph.
+2. **Knowledge Graph Non-Duplication**: Content exists once in `COSYstudio` and is referenced via `cid`.
+3. **Automatic Propagation**: Updating a canonical object automatically updates every downstream app and lesson.
+4. **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
+5. **Folderless Database-First**: Dynamic metadata filtering replaces nested folder hierarchies.
