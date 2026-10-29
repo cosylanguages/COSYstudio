@@ -12,6 +12,18 @@ Designed as a modern, high-velocity database-first creator application inspired 
 
 Everything in COSYstudio is an atomic **Content Object (`ContentObject`)** identified by an immutable Content Identifier (`cid`). Dynamic database filtering and Airtable-like views replace traditional folder trees.
 
+## Educational Content Knowledge Graph & Automatic Propagation
+
+COSYstudio structures all content as a **Directed Knowledge Graph**:
+
+```
+Lesson -> Vocabulary -> Grammar -> Articles -> Games -> Quests -> Exercises -> Media -> Assessments -> Flashcards -> Pronunciation
+```
+
+- **Zero Information Duplication**: Lessons, articles, games, and quests reference canonical `cid_*` objects instead of copying content.
+- **Automatic Propagation**: Updating a single vocabulary word or grammar rule automatically updates every downstream lesson, game, worksheet, quest, and article using that word across the entire ecosystem via event bus broadcasts and edge CDN invalidation.
+* **SemVer & Alias Versioning**: Dynamic pointers (`@latest`, `@production`) auto-propagate non-breaking patch/minor updates while pinning breaking structural major changes (`v2.0.0`) for manual author review.
+
 ## Visual Lesson Builder & Block-Based Engine
 
 COSYstudio includes a Notion-style drag-and-drop Visual Lesson Builder that operates on 100% native JSON documents (**Zero XML**):
@@ -60,19 +72,22 @@ COSYstudio consists of 12 modern, integrated modules engineered for high-scale R
 For complete detailed specifications, diagrams, matrices, shared schemas, and migration strategies, please refer to:
 
 - 📖 **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Full Principal Architect specification document.
-  - **Section 1**: Visual Lesson Builder & 100% JSON Block Engine (Zero XML)
-  - **Section 2**: 24 Lesson Builder Blocks & 7 Core Lifecycle Contracts
-  - **Section 3**: Real-Time Collaboration (Yjs CRDTs) & Undo/Redo Engine
-  - **Section 4**: Reusable Template Engine (`cid_template_*`)
-  - **Section 5**: Unified Content Object Model & Standardized Metadata
-  - **Section 6**: Entity Relationship Diagrams (ERDs for Content Objects & Relations)
-  - **Section 7**: Verified Repository Boundary Analysis (11 Repositories)
-  - **Section 8**: 5-Phase Zero-Downtime Migration Strategy
+  - **Section 1**: Educational Content Knowledge Graph & Non-Duplication Architecture
+  - **Section 2**: Automatic Update Propagation Engine
+  - **Section 3**: Versioning & Dependency Governance Strategy
+  - **Section 4**: High-Level Ecosystem Architecture Diagram
+  - **Section 5**: Visual Lesson Builder & 100% JSON Block Engine (Zero XML)
+  - **Section 6**: Unified Content Object Model & Standardized Metadata
+  - **Section 7**: Entity Relationship Diagrams (ERDs)
+  - **Section 8**: Data Ownership Matrix (11 Repositories x Domains)
+  - **Section 9**: Verified Repository Boundary Analysis (11 Repositories)
+  - **Section 10**: Shared Packages (`@cosy/*`) & Governance
+  - **Section 11**: 5-Phase Zero-Downtime Migration Strategy
 
 ## Guiding Architectural Axioms
 
-1. **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
-2. **Folderless Database-First**: Dynamic metadata filtering replaces nested folder hierarchies.
-3. **Content Centralization**: No downstream application creates or stores raw content tables.
-4. **Decoupled Identity (`cid`)**: Downstream applications store only immutable content IDs (`cid_*`).
-5. **Event-Driven Propagation**: Content updates publish via Kafka/NATS event bus to invalidate CDN/Redis caches.
+1. **Knowledge Graph Non-Duplication**: Content exists once in `COSYstudio` and is referenced via `cid`.
+2. **Automatic Propagation**: Updating a canonical object automatically updates every downstream app and lesson.
+3. **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
+4. **Folderless Database-First**: Dynamic metadata filtering replaces nested folder hierarchies.
+5. **Decoupled Identity (`cid`)**: Downstream applications store only immutable content IDs (`cid_*`).

@@ -18,9 +18,133 @@ Instead, COSYstudio implements a **Database-First Content Architecture**:
 
 ---
 
-## 1. High-Level Ecosystem Architecture Diagram
+## 1. Educational Content Knowledge Graph & Non-Duplication Architecture
 
-The diagram below illustrates how `COSYstudio` acts as the central Content Operating System delivering RLOs and media manifests to all downstream consumer repositories and services.
+In COSYstudio, lessons, games, articles, and assessments **never duplicate information**. Every composite entity is a node in a **Directed Educational Knowledge Graph** that references canonical atomic objects by Content Identifiers (`cid_*`).
+
+### 1.1 Knowledge Graph Node Hierarchy
+
+The Knowledge Graph connects atomic learning objects into higher-level composite structures through typed relational edges:
+
+```
+                          [ LESSON CONTAINER ]
+                                    |
+              +---------------------+---------------------+
+              |                                           |
+     [ VOCABULARY NODE ]                         [ GRAMMAR RULE NODE ]
+              |                                           |
+      +-------+-------+                           +-------+-------+
+      |               |                           |               |
+[ ARTICLE NODE ] [ GAME BUNDLE ]             [ QUEST SCRIPT ] [ EXERCISE BLOCK ]
+      |               |                           |               |
+      +-------+-------+                           +-------+-------+
+              |                                           |
+       [ MEDIA ASSET ]                             [ ASSESSMENT QUIZ ]
+              |                                           |
+     [ FLASHCARD CARD ]                          [ PRONUNCIATION DRILL ]
+```
+
+#### Node Hierarchy Flow:
+1. **Lesson (`cid_lesson_*`)**: Top-level composition container assembling learning sequences.
+2. **Vocabulary (`cid_vocab_*`)**: Canonical headword term, IPA phonetics, and translation definitions.
+3. **Grammar (`cid_gram_*`)**: Structural rule explanations, form-meaning-use formulas, and CCQ checks.
+4. **Articles (`cid_article_*`)**: Cultural reads and magazine posts embedding vocabulary/grammar nodes.
+5. **Games (`cid_gamepack_*`)**: Game prompt pools for `COSYgames` referencing target vocabulary/grammar.
+6. **Quests (`cid_quest_*`)**: Open-world 3D NPC dialogue trees in `COSYworld` referencing dialogue/vocab.
+7. **Exercises (`cid_exercise_*`)**: Interactive practice blocks (gap-fill, sorting, matching) referencing target terms.
+8. **Media (`cid_media_*`)**: Audio snippets, native voice tracks, video manifests, 3D models.
+9. **Assessments (`cid_quiz_*`)**: Graded evaluation items referencing exercises and rubrics.
+10. **Flashcards (`cid_card_*`)**: Memory review cards referencing vocabulary/grammar CIDs.
+11. **Pronunciation (`cid_drill_*`)**: Speech evaluation targets referencing target IPA and audio assets.
+
+---
+
+### 1.2 Knowledge Graph Relationship Types
+
+Relational edges between Knowledge Graph nodes are strictly typed:
+
+| Relationship Type | Direction | Description & Example |
+| :--- | :--- | :--- |
+| **`CONTAINS`** | Composite -> Child | Lesson contains Vocabulary: `cid_lesson_402 CONTAINS cid_vocab_9021` |
+| **`EXPLAINS`** | Grammar -> Vocabulary | Grammar rule explains verb usage: `cid_gram_104 EXPLAINS cid_vocab_8921` |
+| **`EXERCISES`** | Exercise -> Vocab/Grammar | Gap-fill tests vocabulary item: `cid_exercise_101 EXERCISES cid_vocab_9021` |
+| **`PREREQUISITE_FOR`**| Node -> Node | A1 Vocabulary is prerequisite for B1 Lesson: `cid_vocab_101 PREREQUISITE_FOR cid_lesson_402` |
+| **`TRANSFORMS_TO`** | Vocab -> Flashcard/Game | Vocabulary transforms into Flashcard: `cid_vocab_9021 TRANSFORMS_TO cid_card_9021` |
+| **`REFERENCES_MEDIA`**| Node -> Media | Vocabulary references pronunciation audio: `cid_vocab_9021 REFERENCES_MEDIA cid_media_801` |
+| **`EVALUATES`** | Assessment -> Node | Quiz evaluates Grammar rule mastery: `cid_quiz_301 EVALUATES cid_gram_104` |
+| **`VARIANT_OF`** | Node -> Node | Dialect variant relation: `cid_vocab_9021_us VARIANT_OF cid_vocab_9021_uk` |
+
+---
+
+## 2. Automatic Update Propagation Engine
+
+Because downstream applications (`COSYlanguages`, `COSYgames`, `COSYworld`, `COSYpractice`, `COSYmagazine`) reference canonical `cid_*` keys rather than embedding copies, **updating a single canonical object automatically updates every downstream consumer.**
+
+### Example: Updating a Vocabulary Word ("El Cubierto")
+
+Suppose an editor updates the canonical vocabulary node `cid_vocab_9021` ("El Cubierto"):
+1. Updates definition text or attaches a higher-quality native audio recording (`cid_media_801`).
+2. The COSYstudio core publishes a `content.updated` event to the NATS / Kafka Event Bus.
+3. The event bus notifies Edge API nodes and triggers instant CDN cache invalidation.
+4. **Instant Downstream Propagation**:
+   * **Lessons** in `COSYlanguages` automatically show the new audio and definition.
+   * **Micro-games** in `COSYgames` play the new audio snippet during matching games.
+   * **Articles** in `COSYmagazine` update inline vocabulary popup cards.
+   * **3D Quests** in `COSYworld` update NPC dialogue audio prompts.
+   * **Worksheets & Print Booklets** in `COSYmanuals` re-render with corrected translation keys.
+   * **Flashcards & Drills** in `COSYpractice` update speech evaluation targets.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Editor as Content Editor
+    participant Studio as COSYstudio Core
+    participant EventBus as NATS / Kafka Event Bus
+    participant EdgeCDN as Global Edge CDN / Redis
+    participant LangApp as COSYlanguages
+    participant GameApp as COSYgames
+    participant WorldApp as COSYworld
+    participant MagApp as COSYmagazine
+
+    Editor->>Studio: Update Canonical Vocab (cid_vocab_9021: New Audio + Definition)
+    Studio->>Studio: Validate Schema & Bump Version (cid_vocab_9021@1.2.0)
+    Studio->>EventBus: Broadcast Event: content.updated { cid: "cid_vocab_9021", version: "1.2.0" }
+
+    EventBus-->>EdgeCDN: Invalidate Cache for cid_vocab_9021
+    EdgeCDN->>EdgeCDN: Re-fetch & Populate Normalized JSON Payload
+
+    EventBus-->>LangApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
+    EventBus-->>GameApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
+    EventBus-->>WorldApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
+    EventBus-->>MagApp: Cache Invalidation Notice -> Refetches cid_vocab_9021
+
+    Note over LangApp, MagApp: Every Lesson, Game, Quest, and Article is automatically updated!
+```
+
+---
+
+## 3. Versioning & Dependency Governance Strategy
+
+To ensure seamless content updates without breaking active student sessions or consumer API contracts, COSYstudio enforces strict versioning rules.
+
+### 3.1 Versioning Contracts: Immutable Versions vs Dynamic Aliasing
+
+* **Immutable Version Identifiers (`cid@version`)**: Every version of a content object is immutable (e.g. `cid_vocab_9021@1.0.0`, `cid_vocab_9021@1.1.0`).
+* **Dynamic Pointer Aliases (`@latest`, `@staging`, `@production`)**: Downstream applications query dynamic aliases (e.g. `cid_vocab_9021@production`).
+* **SemVer Propagation Rules**:
+  * **PATCH (`1.0.0` -> `1.0.1`)**: Typo fixes, definition refinement, minor audio re-recording. **Auto-propagates instantly** to `@production` alias.
+  * **MINOR (`1.0.0` -> `1.1.0`)**: Additive non-breaking changes (new example sentence, additional regional IPA variant). **Auto-propagates instantly** to `@production` alias.
+  * **MAJOR (`1.0.0` -> `2.0.0`)**: Structural breaking changes (part of speech change, complete headword restructuring). **Does NOT auto-propagate to `@production`**. Creates a new major version pointer, requiring author review and migration approval in downstream lessons.
+
+### 3.2 Graph Dependency Impact Analysis & Rollback Safety
+
+Before publishing a major update or deprecating an object, COSYstudio performs a **Graph Dependency Impact Analysis**:
+* The right Inspector Drawer displays all downstream dependencies (`Reused In: 14 Lessons, 3 Games, 2 Quests`).
+* **Emergency Rollback**: If an update contains an issue, the author clicks *"Rollback Alias"*, instantly pointing `cid_vocab_9021@production` back to `v1.1.0` across the global Edge CDN in <15ms.
+
+---
+
+## 4. High-Level Ecosystem Architecture Diagram
 
 ```
 +--------------------------------------------------------------------------------------------------------+
@@ -73,170 +197,15 @@ The diagram below illustrates how `COSYstudio` acts as the central Content Opera
 
 ---
 
-## 2. Notion-Style Visual Lesson Builder & JSON Block Engine
+## 5. Notion-Style Visual Lesson Builder & JSON Block Engine
 
-COSYstudio features a modern, drag-and-drop **Visual Lesson Builder** inspired by Notion, ProgressMe, Edvibe, and Figma.
+COSYstudio features a modern, drag-and-drop **Visual Lesson Builder** operating on 100% native JSON document trees (**Zero XML**).
 
-### Key Visual Builder Principles:
-* **Zero XML**: COSYstudio NEVER exposes XML. XML is prone to parsing overhead, verbosity, and schema fragility.
-* **100% JSON Internals**: Lessons are stored, edited, validated, and serialized natively as JSON document graphs.
-* **Block-Based Composition**: Lessons consist of an ordered list of draggable, nestable content blocks (`LessonBlock`).
-* **Slash Commands (`/`) & Drag Handles**: Type `/` to insert any block or drag the six-dot grip handle to reorder blocks.
-* **Undo/Redo Engine**: Time-travel history stack implemented via Conflict-Free Replicated Data Types (CRDTs / Yjs / Automerge) supporting `Cmd+Z` and `Cmd+Shift+Z`.
-* **Collaborative Live Editing**: Multiplayer real-time co-authoring with live avatar presence indicators, cursor position tracking, and block-level lock states via WebSockets/WebRTC.
-* **Reusable Templates System**: Save any block sequence as a reusable template (`cid_template_*`) (e.g. *"A2 Vocabulary Warmup Template"*, *"B1 Debate Routine Template"*).
-
-```
-+---------------------------------------------------------------------------------------------------------+
-|  [COSYstudio]  Visual Lesson Builder: "Dining Out - Ordering in Spanish"     [Undo Cmd+Z] [Redo] [Share]|
-+---------------------------------------------------------------------------------------------------------+
-|  (+) Add Block  |  [/] Type slash command  |  Collaborators: (A) Anna  (J) James  |  [Preview] [Publish]|
-+---------------------------------------------------------------------------------------------------------+
-|  [::]  # Dining Out: Ordering Food & Drinks                                            (Heading Block)   |
-|  [::]  In this lesson, you will learn how to order food politely in Spanish.          (Rich Text Block) |
-|                                                                                                         |
-|  [::]  +----------------------------------------------------------------------------+                   |
-|        | Vocabulary Table Block                                      [cid_vocab_9021]|                   |
-|        | * El cubierto (noun) - Cutlery / Silverware                 [Audio: Play]   |                   |
-|        | * La cuenta (noun)   - The bill / Check                     [Audio: Play]   |                   |
-|        +----------------------------------------------------------------------------+                   |
-|                                                                                                         |
-|  [::]  +----------------------------------------------------------------------------+                   |
-|        | Interactive Gap Fill Block                                                 |                   |
-|        | "Por favor, tráigame la ____________ [cuenta]."                           |                   |
-|        +----------------------------------------------------------------------------+                   |
-|                                                                                                         |
-|  [::]  +----------------------------------------------------------------------------+                   |
-|        | AI Discussion Block (Interactive)                                          |                   |
-|        | Scenario: Practice ordering coffee with AI Barista (Roleplay mode)         |                   |
-|        +----------------------------------------------------------------------------+                   |
-+---------------------------------------------------------------------------------------------------------+
-```
-
----
-
-## 3. Comprehensive 24 Lesson Builder Blocks & 7 Core Lifecycle Contracts
-
-Every block in COSYstudio strictly defines 7 core lifecycle contracts:
-1. **Schema**: JSON Schema definition validating block data integrity.
-2. **Properties**: Configurable metadata properties edited via the Inspector Drawer.
-3. **Validation**: Automated validation rules checking required fields, audio links, and CEFR parity.
-4. **Preview**: WYSIWYG real-time rendering engine for teacher/student preview modes.
-5. **Serialization**: JSON export/import and Edge CDN payload compilation contract.
-6. **Rendering**: Client-side component renderer definition for Web, Mobile, and 3D HUD.
-7. **Future Extensibility**: Plugin extension hooks (`onInit`, `onStateChange`, `customAction`) for custom third-party blocks.
-
-Below are the 24 available blocks in COSYstudio:
-
-### 3.1 Content & Layout Blocks
-1. **Heading Block**: Level (H1-H3), text key, anchor ID.
-2. **Rich Text Block**: ProseMirror JSON document tree, inline vocabulary annotations.
-3. **Image Block**: Image object CID, localized alt text, caption, focal point.
-4. **Gallery Block**: Array of image CIDs, layout mode (grid, carousel, masonry).
-5. **Video Block**: Video CID, HLS manifest, word-level VTT subtitles.
-6. **Audio Block**: Audio CID, waveform visualizer, timestamp alignment JSON.
-
-### 3.2 Interactive & Language Blocks
-7. **Dialogue Block**: Speaker turns array, avatar placements, speech audio CIDs.
-8. **Vocabulary Table Block**: Array of `cid_vocab_*` references, customizable column view.
-9. **Grammar Table Block**: References `cid_gram_*`, pattern formula visualizer, CCQ checks.
-10. **Timeline Block**: Chronological event list, tense usage time-map.
-
-### 3.3 Practice & Exercise Blocks
-11. **Matching Block**: Left/right text/media pair contracts, drag-to-connect renderer.
-12. **Sorting Block**: Categorized bucket sorting, gender/theme sorting rules.
-13. **Gap Fill Block**: Sentence template with `[gap]` answer definitions, word bank pills.
-14. **Flashcards Block**: Front/back card CIDs, 3D flip renderer, SRS queue binding.
-15. **Pronunciation Block**: Target audio CID, phonetic IPA, speech evaluation score.
-16. **Speaking Block**: Prompt key, max recording duration, rubric CID, submission booth.
-17. **AI Discussion Block**: AI persona role, roleplay scenario prompt, vocabulary constraints.
-
-### 3.4 Assessment & Evaluation Blocks
-18. **Quiz Block**: References `cid_quiz_*`, time limits, pass/fail threshold.
-19. **Poll Block**: Question key, voting options, live percentage bar chart.
-20. **Reflection Block**: Reflection prompt, confidence star rating (1-5), word counter.
-
-### 3.5 Administrative & Workflow Blocks
-21. **Homework Block**: Assignment title, instructions, due date offset, child RLO CIDs.
-22. **Teacher Notes Block**: Visible exclusively in Teacher mode, CCQs, pacing time, common error warnings.
-23. **Assessment Block**: Rubric matrix CID, grading scale, criteria weights.
-24. **Custom Extension Block**: Sandboxed plugin container for third-party extensions.
-
----
-
-## 4. Real-Time Collaboration & History Engine
-
-### 4.1 Undo/Redo Engine
-COSYstudio implements a deterministic history stack based on **Immutable State Snapshots** and **Delta Operations**:
-* Every user action (block insert, reorder, property change, delete) pushes an operation delta onto the local undo stack (`Cmd+Z`).
-* Undoing pops the operation delta, applies the inverse operation, and pushes it onto the redo stack (`Cmd+Shift+Z`).
-
-### 4.2 Real-Time Collaborative Editing Architecture
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor AuthorA as Author A (Browser)
-    actor AuthorB as Author B (Browser)
-    participant Relay as COSYstudio Yjs/CRDT Relay Server
-    participant DB as COSYstudio Master DB
-
-    AuthorA->>Relay: Connect WebSocket / WebRTC Session (lesson_402)
-    AuthorB->>Relay: Connect WebSocket / WebRTC Session (lesson_402)
-    Relay-->>AuthorA: Sync Initial Document State (Y.Doc Snapshot)
-    Relay-->>AuthorB: Sync Initial Document State (Y.Doc Snapshot)
-
-    Note over AuthorA: Author A inserts Vocabulary Block at Index 2
-    AuthorA->>AuthorA: Apply Local Yjs Doc Update
-    AuthorA->>Relay: Broadcast Yjs State Delta { client: "A", op: "insert_block", index: 2 }
-    Relay-->>AuthorB: Forward Delta { client: "A", op: "insert_block", index: 2 }
-    AuthorB->>AuthorB: Apply Remote Yjs Update (Instant non-blocking merge)
-
-    Note over AuthorB: Author B edits Gap Fill Text
-    AuthorB->>Relay: Broadcast Yjs State Delta
-    Relay-->>AuthorA: Forward Delta
-
-    Note over Relay: Auto-save interval (every 5 seconds)
-    Relay->>DB: Persist Compiled Document Snapshot JSON
-```
-
----
-
-## 5. Reusable Template Engine
-
-Any structured sequence of blocks can be published as a **Reusable Template** (`cid_template_*`).
-
-```json
-{
-  "cid": "cid_template_a2_grammar_warmup",
-  "templateName": "A2 Grammar Warmup & Practice Template",
-  "cefrLevel": "A2",
-  "category": "GRAMMAR_DRILL",
-  "blocks": [
-    {
-      "type": "heading",
-      "level": 1,
-      "textLocKey": "loc_tmpl_warmup_title"
-    },
-    {
-      "type": "grammar_table",
-      "grammarCid": "{{REPLACE_GRAMMAR_CID}}"
-    },
-    {
-      "type": "gap_fill",
-      "sentencePattern": "{{REPLACE_SENTENCE_PATTERN}}"
-    },
-    {
-      "type": "pronunciation",
-      "targetAudioCid": "{{REPLACE_AUDIO_CID}}"
-    },
-    {
-      "type": "teacher_notes",
-      "instructionsText": "Check student pronunciation on target verb endings."
-    }
-  ]
-}
-```
+* **24 Draggable Blocks**: Heading, Rich text, Image, Gallery, Video, Audio, Dialogue, Vocabulary Table, Grammar Table, Timeline, Matching, Sorting, Gap Fill, Flashcards, Pronunciation, Speaking, AI Discussion, Quiz, Poll, Reflection, Homework, Teacher Notes, Assessment, Custom Extension.
+* **7 Lifecycle Contracts per Block**: Schema, Properties, Validation, Preview, Serialization, Rendering, Future Extensibility.
+* **Real-Time Collaboration**: Yjs/CRDT WebSocket relay for multiplayer live co-authoring.
+* **Undo/Redo Engine**: Non-blocking time-travel history stack (`Cmd+Z` / `Cmd+Shift+Z`).
+* **Reusable Templates**: Save and instantiate block sequences as reusable templates (`cid_template_*`).
 
 ---
 
@@ -483,8 +452,8 @@ Migrating existing applications across all 11 repositories to the strict COSYstu
 
 ## Conclusion
 
-By combining a Notion-style Visual Lesson Builder, 24 extensible block primitives, 100% JSON internal contracts (zero XML), real-time collaboration (Yjs CRDTs), and a database-first folderless Content Operating System:
+By combining a Notion-style Visual Lesson Builder, 24 extensible block primitives, 100% JSON internal contracts (zero XML), real-time collaboration (Yjs CRDTs), an Educational Content Knowledge Graph, and a database-first folderless Content Operating System:
 * **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
-* **Zero Content Duplication**: Content exists once in `COSYstudio` and is referenced via `cid`.
-* **Collaborative Authoring**: Real-time multiplayer co-authoring with full undo/redo capabilities.
+* **Knowledge Graph Non-Duplication**: Content exists once in `COSYstudio` and is referenced via `cid`.
+* **Automatic Update Propagation**: Updating one canonical object automatically updates every downstream lesson, game, article, and quest in real-time.
 * **Domain Ownership**: Clean isolation across all 11 `cosylanguages/` repositories.
