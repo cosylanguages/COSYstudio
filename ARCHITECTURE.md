@@ -1,26 +1,28 @@
-# COSYstudio Architecture Specification: Central Content Operating System (COS)
+# COSYstudio Architecture & Product Specification: Central Content Operating System (COS)
 
-## Executive Summary & Core Architectural Philosophy
+## Executive Summary & Design Philosophy
 
 **COSYstudio is NOT a Learning Management System (LMS).**
 
-It is the **Central Content Operating System (COS)** that powers the entire **COSYlanguages** ecosystem. An LMS or platform service manages user accounts, subscriptions, class rosters, event registrations, and study progress. In contrast, **COSYstudio** serves exclusively as the single source of truth for all canonical content creation, localization management, content graph orchestration, asset transformation pipelines, taxonomy tagging, and edge content distribution across all 11 ecosystem repositories.
+It is the **Central Content Operating System (COS)** that powers the entire **COSYlanguages** ecosystem. An LMS or platform service manages user accounts, student enrollments, course completions, class rosters, event ticketing, and active subscriptions. In contrast, **COSYstudio** serves exclusively as the single source of truth (SSOT) for creating, localizing, versioning, orchestrating, and distributing thousands of **Reusable Learning Objects (RLOs)**.
 
-### Key Architectural Axioms:
-1. **Single Source of Truth (SSOT)**: Every piece of canonical content—vocabulary items, grammar explanations, audio snippets, video lessons, 3D world dialogues, micro-game prompt packs, magazine articles, practice drills, user manuals, and event materials—exists **exactly once** within COSYstudio.
-2. **Strict Decoupling via Content IDs (`cid`)**: External consumer applications (e.g., `COSYlanguages`, `COSYworld`, `COSYgames`, `COSYpractice`, `COSYmanuals`, `COSYevents`) **never** duplicate, re-author, or embed raw content into their own databases. They store only immutable Content Identifiers (`cid_*`) and fetch or stream resolved content schemas via high-performance edge APIs or global CDN caches.
-3. **Domain Ownership Isolation**: Repositories maintain strict boundaries. Data belonging to identity/billing (`COSYplatform`), user progress (`COSYlanguages`), spatial rendering (`COSYworld`), practice execution (`COSYpractice`), event ticketing (`COSYevents`), or analytics (`COSYdata`) is isolated within its respective domain and communicates via explicit, versioned APIs.
+### Product Inspirations & Modern Experience
+Instead of bloated legacy interfaces (e.g., Skyeng), **COSYstudio** is designed as a modern, high-velocity, block-based Content Operating System inspired by the best developer and creator tools:
+* **Notion**: Block-based content composition (`/` slash commands, drag-and-drop hierarchy, nested property views).
+* **Linear**: Ultra-fast keyboard-first navigation (`Cmd+K` command palette, instant search, keyboard shortcuts, deterministic states, high performance).
+* **Figma**: Visual canvas composition, node-based content graph linking, multiplayer live collaboration, real-time presence indicators, reusable component instances.
+* **ProgressMe & Edvibe**: Specialized interactive language learning block primitives (gap-fill, audio alignment, interactive dialogue cards, exercise transformers).
 
 ---
 
-## 1. Repository Boundary Analysis (11 Repositories)
+## 1. Ecosystem Repository Boundaries (11 Repositories)
 
-Below is the definitive analysis for all 11 repositories in the `cosylanguages/` organization.
+Below is the definitive boundary analysis for all 11 repositories in the `cosylanguages/` organization.
 
 ### 1.1 COSYstudio (`cosylanguages/COSYstudio`)
 * **Responsibility**: Authoring, versioning, publishing workflows, asset ingestion/pipeline (transcoding, audio alignment, 3D model processing), taxonomy tree management, localization master translation, edge content distribution, and content graph relations.
 * **Owned Data**:
-  * Canonical Content Nodes (Vocabulary, Grammar, Sentences, Exercises, Articles, Quest Scenarios, Drills, Manual Articles).
+  * Canonical Content Nodes / Reusable Learning Objects (Vocabulary, Grammar, Exercises, Articles, Quest Scenarios, Drills, Manual Articles).
   * Asset Metadata & Binary Manifests (CDN URLs, audio timestamps, transcriptions, video renditions, 3D models).
   * Localization Master Keys & Multi-language Translations.
   * Taxonomy Trees, Categories, Tags, and CEFR Alignment Maps.
@@ -66,177 +68,323 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 
 ### 1.3 COSYworld (`cosylanguages/COSYworld`)
 * **Responsibility**: Immersive 3D spatial rendering, virtual environment engine, avatar movement, spatial audio, real-time NPC interactions, location-based language quests, multiplayer spatial instances.
-* **Owned Data**:
-  * 3D Instance Session State & Player Coordinates.
-  * Avatar Customization State & Cosmetic Inventories.
-  * NPC Runtime Interaction State (e.g., current quest step state per player session).
-  * Spatial Instance Telemetry & Player Proximity Logs.
-* **Data It Must NEVER Own**:
-  * Canonical NPC Dialogue Scripts, Quest Descriptions, and Translations.
-  * Dictionary Definitions and Grammar Knowledge Nodes.
-  * Player Global Learning Curriculum / SRS State.
-* **Exposed APIs**:
-  * `Spatial World Gateway API` (WebSocket / gRPC) for player instance connection.
-  * `NPC Session Service` (`POST /v1/spatial/npc/interact`).
-* **Consumed APIs from COSYstudio**:
-  * Fetches `cid_dialogue_*` trees, `cid_quest_*` nodes, localized object names (`cid_loc_*`), and spatial audio asset URLs (`cid_audio_*`).
+* **Owned Data**: 3D Instance Session State, Player Coordinates, Avatar Customization, Cosmetic Inventories, NPC Runtime Interaction State.
+* **Data It Must NEVER Own**: Canonical NPC Dialogue Scripts, Quest Descriptions, Translations, Dictionary Definitions, Grammar Knowledge Nodes.
+* **Exposed APIs**: `Spatial World Gateway API` (WebSocket / gRPC), `NPC Session Service`.
+* **Consumed APIs from COSYstudio**: Fetches `cid_dialogue_*` trees, `cid_quest_*` nodes, localized object names (`cid_loc_*`), and spatial audio asset URLs (`cid_audio_*`).
 
 ---
 
 ### 1.4 COSYgames (`cosylanguages/COSYgames`)
 * **Responsibility**: Arcade micro-games, time-attack challenges, multiplayer competitive word games, global leaderboards, matchmaking, achievement unlock logic.
-* **Owned Data**:
-  * Micro-game Match Sessions & Real-time Game State.
-  * High Score Tables & Leaderboard Rankings.
-  * Game Achievements & Badge Unlocks.
-  * In-Game Virtual Currency & Item Inventories.
-* **Data It Must NEVER Own**:
-  * Master Word Lists, Distractors, and Translation Dictionaries.
-  * Pedagogical Rules & CEFR Difficulty Mapping (Reads CEFR tag attached to `cid`).
-  * User Academic Course Progress.
-* **Exposed APIs**:
-  * `Matchmaking API` (`POST /v1/matchmaking/join`)
-  * `Leaderboard Service` (`GET /v1/leaderboards/{game_id}`)
-  * `Game Score Submission API` (`POST /v1/games/scores`)
-* **Consumed APIs from COSYstudio**:
-  * Fetches mini-game content bundles (`cid_gamepack_*`) containing targeted prompt words, media assets, and distractors.
+* **Owned Data**: Micro-game Match Sessions, High Score Tables, Leaderboard Rankings, Badges, Virtual Currency.
+* **Data It Must NEVER Own**: Master Word Lists, Distractors, Translation Dictionaries, Pedagogical Rules, CEFR Mapping.
+* **Exposed APIs**: `Matchmaking API`, `Leaderboard Service`, `Game Score Submission API`.
+* **Consumed APIs from COSYstudio**: Fetches mini-game content bundles (`cid_gamepack_*`) containing targeted prompt words, media assets, and distractors.
 
 ---
 
 ### 1.5 COSYtools (`cosylanguages/COSYtools`)
 * **Responsibility**: Utility suite and productivity tools: instant popup dictionary lookup, verb conjugation engines, text readability/CEFR difficulty analyzers, browser reading extensions, mobile companion widgets.
-* **Owned Data**:
-  * Tool-Specific User Preferences & Quick-Bookmark Lists.
-  * Analysis History Cache (e.g., user-submitted text analysis results).
-  * Browser Extension Settings & Offline Lookup Caches.
-* **Data It Must NEVER Own**:
-  * Master Dictionary Definitions & Conjugation Source Tables.
-  * User Learning Progress & Subscription Account Records.
-* **Exposed APIs**:
-  * `Text Readability & CEFR Analyzer API` (`POST /v1/tools/analyze-text`)
-  * `Conjugation Helper Endpoint` (`GET /v1/tools/conjugate/{verb_id}`)
-* **Consumed APIs from COSYstudio**:
-  * Queries COSYstudio Content & Search API directly for instant dictionary definitions (`cid_vocab_*`), grammatical conjugations (`cid_grammar_*`), and reference examples.
+* **Owned Data**: Tool-Specific User Preferences, Analysis History Cache, Browser Extension Settings.
+* **Data It Must NEVER Own**: Master Dictionary Definitions, Conjugation Source Tables, User Learning Progress, Subscription Accounts.
+* **Exposed APIs**: `Text Readability & CEFR Analyzer API`, `Conjugation Helper Endpoint`.
+* **Consumed APIs from COSYstudio**: Queries COSYstudio Content & Search API directly for instant dictionary definitions (`cid_vocab_*`), grammatical conjugations (`cid_grammar_*`), and reference examples.
 
 ---
 
 ### 1.6 COSYdata (`cosylanguages/COSYdata`)
 * **Responsibility**: Ecosystem-wide telemetry ingestion, data lakehouse, cross-app user journey analytics, business intelligence dashboards, AI/ML model training (speech evaluation models, recommendation engines).
-* **Owned Data**:
-  * Anonymized Behavioral Telemetry Logs.
-  * Processed Data Warehouse Tables (ClickHouse / BigQuery).
-  * Machine Learning Models & Trained Weights.
-  * Aggregate Ecosystem Metrics & Business Intelligence Reports.
-* **Data It Must NEVER Own**:
-  * Live Transactional Content Source (Reads content metadata from COSYstudio).
-  * User Auth Credentials / Secret Keys.
-* **Exposed APIs**:
-  * `Telemetry Ingest API` (`POST /v1/telemetry/events`)
-  * `ML Recommendation Inference API` (`POST /v1/ml/recommend-content`)
-  * `BI Analytics Query API` (`GET /v1/analytics/dashboards`)
-* **Consumed APIs from COSYstudio**:
-  * Subscribes to `content.*` streams to index metadata (tags, CEFR level, content type) into the data warehouse for cross-referencing user behavior with content attributes.
+* **Owned Data**: Anonymized Behavioral Telemetry Logs, Data Warehouse Tables, ML Models & Weights, BI Reports.
+* **Data It Must NEVER Own**: Live Transactional Content Source, User Auth Credentials.
+* **Exposed APIs**: `Telemetry Ingest API`, `ML Recommendation Inference API`, `BI Analytics Query API`.
+* **Consumed APIs from COSYstudio**: Subscribes to `content.*` streams to index metadata into data lakehouse for behavioral cross-referencing.
 
 ---
 
 ### 1.7 COSYmagazine (`cosylanguages/COSYmagazine`)
 * **Responsibility**: Editorial publishing & digital cultural publication: cultural articles, audio podcasts, interviews, literary breakdowns, reader discussion forums, issue curation.
-* **Owned Data**:
-  * Article Reader Comments & Reaction Counts.
-  * Reader Article Bookmarks & Reading Position (Scroll % / Last Read Node).
-  * Issue Layout & Feature Banner Configurations.
-* **Data It Must NEVER Own**:
-  * Article Master Copy & Source Markdown/RichText (Owned by COSYstudio).
-  * Embedded Vocabulary/Grammar Explanations (Owned by COSYstudio).
-  * Binary Audio / Video Files (Owned by COSYstudio Media Pipeline).
-* **Exposed APIs**:
-  * `Article Comments API` (`GET/POST /v1/magazine/articles/{id}/comments`)
-  * `Reader Bookmark Service` (`GET/POST /v1/magazine/bookmarks`)
-* **Consumed APIs from COSYstudio**:
-  * Fetches magazine articles (`cid_article_*`), inline vocabulary popups (`cid_vocab_*`), podcasts (`cid_media_*`), and magazine issue indexes.
+* **Owned Data**: Article Comments, Reaction Counts, Reading Bookmarks, Issue Layout Configurations.
+* **Data It Must NEVER Own**: Article Master Copy & Source Markdown/RichText, Embedded Vocabulary/Grammar Nodes, Binary Audio/Video Files.
+* **Exposed APIs**: `Article Comments API`, `Reader Bookmark Service`.
+* **Consumed APIs from COSYstudio**: Fetches magazine articles (`cid_article_*`), inline vocabulary popups (`cid_vocab_*`), podcasts (`cid_media_*`), and magazine issue indexes.
 
 ---
 
 ### 1.8 COSYevents (`cosylanguages/COSYevents`)
 * **Responsibility**: Live community events, webinars, speaking workshops, language exchange meetups, event scheduling, host streaming links, attendee ticketing, WebRTC room orchestration.
-* **Owned Data**:
-  * Event Schedules, Session Timings & Speaker Bios.
-  * Event Registrations, RSVPs, Ticket Purchases & Attendance Logs.
-  * Live Stream Room IDs & WebRTC Connection Tokens.
-  * Event Participant Feedback & Q&A Submissions.
-* **Data It Must NEVER Own**:
-  * Master Educational Handouts or Presentation Content Nodes (Owned by COSYstudio via `cid`).
-  * Core User Identity and Payment Gateways (Delegates to `COSYplatform`).
-  * Long-term SRS Mastery Records (Owned by `COSYlanguages`).
-* **Exposed APIs**:
-  * `Event Schedule API` (`GET /v1/events/upcoming`)
-  * `Ticket Registration API` (`POST /v1/events/{id}/register`)
-  * `Live Stream Gateway Service` (`GET /v1/events/{id}/stream-access`)
-* **Consumed APIs from COSYstudio**:
-  * Fetches event learning material bundles (`cid_eventpack_*`), localized event titles/descriptions, and supporting media assets.
+* **Owned Data**: Event Schedules, Session Timings, Speaker Bios, Registrations, RSVPs, Ticket Purchases, WebRTC Room IDs.
+* **Data It Must NEVER Own**: Master Educational Handouts or Presentation Content Nodes, Core Identity/Payments, SRS Mastery Records.
+* **Exposed APIs**: `Event Schedule API`, `Ticket Registration API`, `Live Stream Gateway Service`.
+* **Consumed APIs from COSYstudio**: Fetches event learning material bundles (`cid_eventpack_*`), localized titles/descriptions, and media.
 
 ---
 
 ### 1.9 COSYplatform (`cosylanguages/COSYplatform`)
 * **Responsibility**: Ecosystem core platform infrastructure, Identity Provider (IdP), central single sign-on (SSO), user profile management, tenancy, subscription & payment billing engine, global API gateway & rate limiting.
-* **Owned Data**:
-  * User Accounts, Auth Credentials, OAuth Tokens, MFA Keys.
-  * Subscription Plans, Billing History, Payment Gateways (Stripe/Apple/Google).
-  * Organization / Team / Institutional Hierarchy Records.
-  * Central API Gateway Access Control & Rate-Limit Rules.
-* **Data It Must NEVER Own**:
-  * Course Pedagogy or SRS Card States (Owned by `COSYlanguages`).
-  * Educational Content, Translations or Media (Owned by `COSYstudio`).
-  * Telemetry Event Analytics (Owned by `COSYdata`).
-* **Exposed APIs**:
-  * `Central Authentication Service` (`POST /v1/auth/token`, `POST /v1/auth/login`)
-  * `User Account & Profile Service` (`GET/PATCH /v1/users/me`)
-  * `Subscription & Billing API` (`GET/POST /v1/billing/subscriptions`)
-  * `Global Gateway / Router`
-* **Consumed APIs from COSYstudio**:
-  * Queries localized legal strings (Terms of Service, Privacy Policy) and localized subscription tier descriptors by `cid_loc_*`.
+* **Owned Data**: User Accounts, Credentials, OAuth Tokens, MFA Keys, Subscription Plans, Billing History, Institutional Hierarchies.
+* **Data It Must NEVER Own**: Course Pedagogy, SRS Card States, Educational Content, Media, Telemetry Analytics.
+* **Exposed APIs**: `Central Authentication Service`, `User Profile Service`, `Subscription & Billing API`, `Global Gateway`.
+* **Consumed APIs from COSYstudio**: Queries localized legal strings (Terms of Service, Privacy Policy) and localized subscription tier descriptors by `cid_loc_*`.
 
 ---
 
 ### 1.10 COSYmanuals (`cosylanguages/COSYmanuals`)
 * **Responsibility**: User documentation, platform user guides, app manuals, FAQ help desk, feature onboarding walkthroughs, API developer documentation.
-* **Owned Data**:
-  * User Help Ticket Submissions & Feedback.
-  * Manual Search Index Cache & Documentation Navigation Tree.
-  * User Helpful/Unhelpful Vote Metrics on Articles.
-* **Data It Must NEVER Own**:
-  * Raw Documentation Article Master Copy & Localization (Owned by COSYstudio as `cid_manual_*`).
-  * User Account Credentials (Delegates to `COSYplatform`).
-* **Exposed APIs**:
-  * `Help Center Query API` (`GET /v1/manuals/search`)
-  * `User Feedback Endpoint` (`POST /v1/manuals/feedback`)
-* **Consumed APIs from COSYstudio**:
-  * Fetches documentation content nodes (`cid_manual_*`), localized UI help tooltips, and diagram/media assets.
+* **Owned Data**: User Help Ticket Submissions, Manual Search Index Cache, Article Vote Metrics.
+* **Data It Must NEVER Own**: Raw Documentation Article Master Copy & Localization (`cid_manual_*`), User Auth Credentials.
+* **Exposed APIs**: `Help Center Query API`, `User Feedback Endpoint`.
+* **Consumed APIs from COSYstudio**: Fetches documentation content nodes (`cid_manual_*`), localized UI help tooltips, and diagram/media assets.
 
 ---
 
 ### 1.11 COSYpractice (`cosylanguages/COSYpractice`)
 * **Responsibility**: Specialized interactive drill execution engine, active output practice, pronunciation/speech evaluation, speed flashcard runner, writing/essay grading execution.
-* **Owned Data**:
-  * Practice Session Execution State (Current drill index, timer, temporary session score).
-  * User Voice Recording Submissions & Speech-to-Text Transcripts.
-  * Practice Performance Analytics per Session.
-* **Data It Must NEVER Own**:
-  * Master Drill Content Items, Target Sentences, Audio Prompts, or Rubrics (Owned by COSYstudio via `cid_drill_*`).
-  * Cumulative User SRS SRS Intervals (Communicates results to `COSYlanguages`).
-  * User Billing or Subscription Access Rights (Verified via `COSYplatform`).
-* **Exposed APIs**:
-  * `Practice Session Runner API` (`POST /v1/practice/sessions/start`)
-  * `Speech Evaluation Service` (`POST /v1/practice/audio/evaluate`)
-  * `Session Submission API` (`POST /v1/practice/sessions/submit`)
-* **Consumed APIs from COSYstudio**:
-  * Fetches drill definitions (`cid_drill_*`), target audio prompts (`cid_audio_*`), and evaluation rubrics (`cid_rubric_*`).
-* **Outputs To Other Services**:
-  * Sends practice score & mastery signals to `COSYlanguages` to update overall student SRS state.
+* **Owned Data**: Practice Session Execution State, User Voice Recording Submissions & Transcripts, Session Analytics.
+* **Data It Must NEVER Own**: Master Drill Content Items, Target Sentences, Audio Prompts, Rubrics (`cid_drill_*`), SRS Intervals.
+* **Exposed APIs**: `Practice Session Runner API`, `Speech Evaluation Service`, `Session Submission API`.
+* **Consumed APIs from COSYstudio**: Fetches drill definitions (`cid_drill_*`), target audio prompts (`cid_audio_*`), and evaluation rubrics (`cid_rubric_*`).
 
 ---
 
-## 2. High-Level Architecture Diagram
+## 2. Navigation Architecture & Workspace Layout
+
+COSYstudio provides a unified, keyboard-first, distraction-free environment.
+
+```
++-------------------------------------------------------------------------------------------------------+
+|  [COSYstudio]  Workspace: English (EN-US)  |  Search/Command Bar (Cmd+K)  |  [AI Assistant] [Publish]|
++-------------------+---------------------------------------------------------------+-------------------+
+|                   |                                                               |                   |
+|  NAVIGATION SIDEBAR|  MAIN WORKSPACE CANVAS                                        | INSPECTOR PANEL   |
+|                   |                                                               |                   |
+|  * Dashboard      |  +---------------------------------------------------------+  | Node ID:          |
+|  * Content Library|  | Lesson Canvas: "Dining Out - Ordering in Spanish"       |  | cid_vocab_9021    |
+|  * Curriculum     |  +---------------------------------------------------------+  |                   |
+|  * Lesson Builder |  |  [/] Slash Command to insert block                      |  | CEFR: B1          |
+|  * Vocabulary     |  |                                                         |  | Type: VOCAB_CARD  |
+|  * Grammar        |  |  +---------------------------------------------------+  |  | Tag: #dining      |
+|  * Media Library  |  |  | Vocabulary Block: "El Cubierto"                   |  |  | Audio: Attached   |
+|  * Assessments    |  |  | [Audio: es_cubierto.mp3]  [CEFR: B1]              |  |  | Relations:        |
+|  * Publishing     |  |  +---------------------------------------------------+  |  | - cid_gram_104    |
+|  * Analytics      |  |                                                         |  |                   |
+|  * AI Assistant   |  |  +---------------------------------------------------+  |  | Reused in:        |
+|  * Settings       |  |  | Interactive Gap-fill Exercise                     |  |  | - 14 Lessons      |
+|                   |  |  | "Por favor, tráigame un ______."                  |  |  | - 3 Micro-games   |
+|                   |  |  +---------------------------------------------------+  |  | - 2 Quests        |
+|                   |  +---------------------------------------------------------+  |                   |
++-------------------+---------------------------------------------------------------+-------------------+
+|  System Status: Edge Synced (15ms)  |  Live Collaborators: 3 Authors  |  Schema Version: v1.4.0         |
++-------------------------------------------------------------------------------------------------------+
+```
+
+### 2.1 Key Navigation Elements
+* **Command Bar (`Cmd+K` / `Ctrl+K`)**: Instant fuzzy search across all RLOs, quick actions, jump to module, switch target language context, and trigger AI generators.
+* **Collapsible Left Navigation Sidebar**: Clean grouping of core modules with active indicators, workspace switchers, and content filter presets.
+* **Main Workspace Canvas**: Flexible view switching between Notion-style block editor, Linear-style list/table views, and Figma-style visual graph node editor.
+* **Right Inspector Panel**: Context-aware panel showing RLO properties, Content ID (`cid`), CEFR metadata, localization status, media bindings, and downstream usage impact graphs.
+
+---
+
+## 3. Detailed Application Modules
+
+COSYstudio is structured into **12 dedicated modules**, each engineered to handle Reusable Learning Objects (RLOs) at scale.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                                COSYstudio Modules                               │
+└─────────────────────────────────────────────────────────────────────────────────┘
+ ├── 1. Dashboard               (Ecosystem Health, Content Velocity, Activity Feed)
+ ├── 2. Content Library          (Global RLO Search, Filtering, Versioning & Tags)
+ ├── 3. Curriculum               (Pedagogical Structures, CEFR Scope & Sequence)
+ ├── 4. Lesson Builder          (Notion-Block Editor, Interactive Card Composers)
+ ├── 5. Vocabulary Database      (Lexical Database, Phonetics, Etymology, Examples)
+ ├── 6. Grammar Database         (Grammatical Patterns, Explanations & Structural Rules)
+ ├── 7. Media Library            (Audio Auto-aligner, Video Transcoder, 3D Assets)
+ ├── 8. Assessment Builder       (Exercise Transformers, Rubrics & Adaptive Testing)
+ ├── 9. Publishing               (Global CDN Edge Pipeline, Staging, Rollbacks)
+ ├── 10. Analytics               (RLO Performance Index, Retention & Effectiveness)
+ ├── 11. AI Assistant            (Auto-Generator, CEFR Estimator, Alignment Engine)
+ └── 12. Settings                (Permissions, Localization Locales, Webhooks & Schemas)
+```
+
+---
+
+### 3.1 Dashboard
+* **Why It Exists**: Authors, instructional designers, and content leads need a high-level command center to track content production velocity, pending translations, edge sync status, and system health.
+* **Core Capabilities**:
+  * Real-time content creation activity stream (who published what RLO).
+  * Content health indicators (missing audio, unverified translations, deprecated nodes).
+  * System-wide edge deployment status across global CDN points of presence.
+  * Rapid creation shortcuts (`Cmd+N` -> New Vocab, New Lesson, New Grammar Rule).
+
+---
+
+### 3.2 Content Library
+* **Why It Exists**: To eliminate duplicate content creation across the enterprise by serving as the central searchable repository of all Reusable Learning Objects (RLOs).
+* **Core Capabilities**:
+  * Unified search index across all content types (Vocabulary, Grammar, Exercises, Quests, Drills, Manuals).
+  * Linear-style instant filtering by target language, CEFR level (`A1`–`C2`), tag taxonomy, status (`DRAFT`, `PUBLISHED`, `DEPRECATED`), and content owner.
+  * "Reused In" impact analyzer showing which downstream apps (`COSYlanguages`, `COSYworld`, `COSYgames`) consume a specific `cid`.
+  * Batch tag management and version history inspect/rollback.
+
+---
+
+### 3.3 Curriculum
+* **Why It Exists**: Language learning requires coherent pedagogical structures. The Curriculum module defines how RLOs are mapped into learning paths, CEFR tracks, skill modules, and topic units without copying content nodes.
+* **Core Capabilities**:
+  * Scope & Sequence visual tree builder.
+  * Drag-and-drop ordering of lesson containers (`cid_lesson_*`) and topic modules.
+  * CEFR difficulty progression validator (flags abrupt difficulty spikes).
+  * Multi-track curriculum mapping (e.g., General Spanish, Business German, Kids French).
+
+---
+
+### 3.4 Lesson Builder
+* **Why It Exists**: Authors need a flexible, fluid canvas to assemble individual RLOs into engaging, interactive lesson flows without touching code.
+* **Core Capabilities**:
+  * **Notion-Style Block Composer**: Slash command (`/`) interface to insert text, audio, video, vocabulary cards, grammar rules, gap-fills, and speech drills.
+  * **Edvibe / ProgressMe Style Interactive Block Primitives**:
+    * Gap-fill transformers, multiple choice, sentence reordering, matching pairs, dialogue prompt cards.
+  * **Figma-Style Canvas & Node Linking**: Visual graph mode for branchable dialogue trees (`COSYworld` quests) and adaptive remediation paths.
+  * Live preview across target client viewports (Mobile App, Web, 3D Spatial HUD, Micro-game overlay).
+
+---
+
+### 3.5 Vocabulary Database
+* **Why It Exists**: Words are foundational language objects. This module manages the master lexicon for target languages, ensuring pronunciation, etymology, definition, and translation consistency.
+* **Core Capabilities**:
+  * Structural definition fields: Headword, IPA phonetics, part of speech, grammatical gender, CEFR tier.
+  * Multi-target translation matrix (e.g., Spanish word translated into English, German, Japanese, Arabic).
+  * Audio snippet binding (native speaker audio recordings or high-fidelity neural TTS).
+  * Sentence example linker (associates `cid_vocab` with verified contextual example sentences).
+
+---
+
+### 3.6 Grammar Database
+* **Why It Exists**: Grammar explanations are frequently duplicated or inconsistently explained across courses. This module establishes canonical, reusable grammar rules.
+* **Core Capabilities**:
+  * Form-meaning-use structural breakdown blocks.
+  * Interactive pattern formula visualizer (e.g., `[Subject] + [Conjugated Verb] + [Direct Object]`).
+  * Contrastive grammar notes (explaining nuances based on student native language).
+  * Automated linking between grammar rules and practice exercises.
+
+---
+
+### 3.7 Media Library
+* **Why It Exists**: Audio, video, and 3D assets power immersive language experiences but require heavy processing, transcoding, and transcript alignment.
+* **Core Capabilities**:
+  * Automated audio-text force alignment (generates word-level timestamps `.vtt` / `.json` for interactive audio reading).
+  * Multi-bitrate video transcoding & streaming manifest generation (HLS / DASH).
+  * 3D Asset ingestion pipeline for `COSYworld` (GLTF / USDZ validation, texture optimization, spatial audio anchor mapping).
+  * Asset CDN CDN distribution manager with automated WebP/Opus/AAC format negotiation.
+
+---
+
+### 3.8 Assessment Builder
+* **Why It Exists**: Testing must accurately measure proficiency without manually creating tests from scratch for every course.
+* **Core Capabilities**:
+  * Dynamic quiz & test generator that pulls RLOs automatically based on target CEFR tags and learning objectives.
+  * Question variant transformer (automatically creates distractor options and alternative question formulations).
+  * Speech & essay rubric designer for `COSYpractice` speech evaluation engines.
+  * Item Response Theory (IRT) difficulty calibrator based on anonymized telemetry feeds from `COSYdata`.
+
+---
+
+### 3.9 Publishing
+* **Why It Exists**: Authors need safe, controlled mechanisms to deploy content updates globally without breaking active student sessions in consumer apps.
+* **Core Capabilities**:
+  * Multi-environment release pipelines (`DRAFT` -> `STAGING` -> `PRODUCTION`).
+  * Global Edge CDN invalidation engine (populates read-through Redis caches in <15ms worldwide).
+  * Differential payload builder (compiles lightweight delta bundles for offline client syncing).
+  * Emergency release rollback button (instantly points `cid` aliases back to previous version).
+
+---
+
+### 3.10 Analytics
+* **Why It Exists**: Content creators need data-driven feedback to continuously refine exercise clarity, vocabulary difficulty, and learner engagement.
+* **Core Capabilities**:
+  * RLO Performance Index: Evaluates failure rates, hint usage, and skip rates per exercise node.
+  * Engagement heatmap showing drop-off points within lesson flows.
+  * Content freshness and usage tracking (highlights unused or outdated content nodes).
+  * Integration with `COSYdata` warehouse for deep pedagogical effectiveness correlation.
+
+---
+
+### 3.11 AI Assistant
+* **Why It Exists**: To accelerate content authoring velocity by 10x while maintaining strict human-in-the-loop editorial quality control.
+* **Core Capabilities**:
+  * **Auto-Generator**: Generates contextual sentences, distractors, exercise prompts, and dialogue scripts.
+  * **CEFR Level Estimator**: Analyzes text readability and assigns CEFR difficulty tags (`A1`–`C2`).
+  * **Automated Translator**: Produces candidate translations across target language matrices.
+  * **Pedagogical Alignment Engine**: Scans lessons for missing prerequisite concepts and recommends relevant grammar/vocabulary RLOs.
+
+---
+
+### 3.12 Settings
+* **Why It Exists**: To manage system governance, user permissions, localization locales, API keys, and schema contracts across the enterprise.
+* **Core Capabilities**:
+  * Role-Based Access Control (RBAC): Author, Translator, Editor, Pedagogical Lead, Admin.
+  * Supported target and native language locale toggles.
+  * Webhooks & NATS/Kafka event stream configuration.
+  * Schema version compatibility viewer (`@cosy/schema-content`).
+
+---
+
+## 4. Key Authoring & Content Workflows
+
+### 4.1 Authoring a Reusable Learning Object (RLO) & Publishing Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Author as Content Author
+    participant StudioUI as COSYstudio UI
+    participant AI as AI Assistant Module
+    participant Core as COSYstudio Core Service
+    participant CDN as Global Edge CDN
+    participant EventBus as NATS / Kafka Event Bus
+    participant Consumer as Consumer Apps (COSYlanguages / COSYgames)
+
+    Author->>StudioUI: Create New Vocabulary Node ("El Cubierto")
+    StudioUI->>AI: Trigger Auto-Fill (IPA, Definition, Examples)
+    AI-->>StudioUI: Return Candidate Metadata & Sentences
+    Author->>StudioUI: Review, Edit & Attach Native Audio File
+    StudioUI->>Core: Save Node (Status: DRAFT, cid: "cid_vocab_9021")
+    Core-->>StudioUI: Saved Successfully
+
+    Author->>StudioUI: Click "Publish to Staging"
+    StudioUI->>Core: Change Status -> PUBLISHED (v1.0.0)
+    Core->>CDN: Push Normalized ContentNode JSON Payload to Edge Caches
+    Core->>EventBus: Emit Event: content.published { cid: "cid_vocab_9021", version: "1.0.0" }
+    EventBus-->>Consumer: Invalidate Local Content Cache
+    Consumer->>CDN: Fetch Updated ContentNode Schema
+```
+
+### 4.2 Notion-Style Block Assembly in Lesson Builder Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Designer as Instructional Designer
+    participant Canvas as Lesson Builder Canvas
+    participant Library as Content Library Module
+    participant Studio as COSYstudio Core
+
+    Designer->>Canvas: Open Lesson Canvas ("Dining Out")
+    Designer->>Canvas: Type "/" (Slash Command) -> Select "Vocabulary Block"
+    Canvas->>Library: Search Vocabulary ("cubierto")
+    Library-->>Canvas: Return RLO Result (cid_vocab_9021)
+    Designer->>Canvas: Attach RLO Instance to Canvas
+    Designer->>Canvas: Type "/" -> Select "Interactive Gap-Fill Exercise"
+    Canvas->>Canvas: Auto-generate sentence prompt using cid_vocab_9021 reference
+    Designer->>Studio: Save Lesson Container (cid_lesson_402)
+    Note over Studio: Lesson stores ONLY references to cid_vocab_9021, NOT raw content copy!
+```
+
+---
+
+## 5. High-Level Architecture Diagram
 
 ```
 +--------------------------------------------------------------------------------------------------------+
@@ -248,7 +396,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 +--------------------------------------------------------------------------------------------------------+
 |                                           COSYstudio (COS)                                             |
 |  +--------------------+   +-----------------------+   +-----------------------+   +------------------+  |
-|  | Authoring & CMS    |   | Localization Manager  |   | Asset Pipeline (Media)|   | Taxonomy & CEFR  |  |
+|  | Authoring & CMS    |   | Localization Manager  |   | Asset Pipeline (Media)|   | AI Assistant     |  |
 |  +--------------------+   +-----------------------+   +-----------------------+   +------------------+  |
 |  |  Content Graph SSOT: Vocabulary, Grammar, Exercises, Quests, Drills, Manuals, Articles, Events   |  |
 |  +--------------------------------------------------------------------------------------------------+  |
@@ -289,7 +437,7 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 
 ---
 
-## 3. Data Ownership Matrix (11 Ecosystem Repositories)
+## 6. Data Ownership Matrix (11 Ecosystem Repositories)
 
 | Data Entity / Domain | studio | platform | languages | world | games | tools | data | magazine | events | manuals | practice |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -313,55 +461,11 @@ Below is the definitive analysis for all 11 repositories in the `cosylanguages/`
 
 ---
 
-## 4. Repository Interaction Diagram
-
-The sequence below details how multiple ecosystem repositories interact with `COSYstudio`, `COSYplatform`, and each other during content publishing, practice execution, and SRS updates.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Author as Content Author
-    actor Student as Student / Learner
-    participant Studio as COSYstudio (COS)
-    participant EventBus as Event Bus (Kafka/NATS)
-    participant Platform as COSYplatform (Auth)
-    participant Lang as COSYlanguages (SRS)
-    participant Practice as COSYpractice (Drills)
-    participant Data as COSYdata Warehouse
-
-    Note over Studio: 1. Author publishes new Drill & Vocabulary Node
-    Author->>Studio: Publish Content (cid_drill_501, cid_vocab_8921)
-    Studio->>EventBus: Publish Event: content.published { cid: "cid_drill_501", version: "1.0.0" }
-    EventBus-->>Lang: Cache invalidation notice
-    EventBus-->>Practice: Cache invalidation notice
-    EventBus-->>Data: Index into Data Lakehouse
-
-    Note over Student, Platform: 2. Student authenticates and starts Practice Drill
-    Student->>Platform: Authenticate & Fetch Token
-    Platform-->>Student: Return JWT Token
-
-    Student->>Practice: Start Practice Session (cid_drill_501)
-    Practice->>Studio: Query Drill Schema & Audio Manifest (cid_drill_501)
-    Studio-->>Practice: Return Drill Content Payload & Audio CDN URLs
-    Practice->>Student: Render Interactive Drill UI
-
-    Note over Student, Practice: 3. Student records voice submission
-    Student->>Practice: Submit Voice Audio Recording
-    Practice->>Practice: Evaluate Pronunciation Score (Score = 92%)
-    Practice->>Data: Stream Practice Telemetry (audio_length, score)
-    Practice->>Lang: Post Mastery Event { userId: "u_101", cid: "cid_vocab_8921", score: 0.92 }
-
-    Note over Lang: 4. COSYlanguages updates SRS state
-    Lang->>Lang: Update SRS Leitner Box & Next Review Date (+5 days)
-```
-
----
-
-## 5. Shared Packages & Governance
+## 7. Shared Packages & Governance
 
 To guarantee type safety, consistent content referencing, and schema validation across all 11 repositories, shared packages are maintained in the `@cosy/` registry.
 
-### 5.1 Package Directory Structure
+### 7.1 Package Directory Structure
 ```
 @cosy/
 ├── schema-content/       # Canonical TypeScript & JSON Schemas for Content Nodes
@@ -371,21 +475,16 @@ To guarantee type safety, consistent content referencing, and schema validation 
 └── core-utils/           # CID generators, CEFR helpers, language code parsers
 ```
 
-### 5.2 Governance Rules
-1. **Zero Runtime Side-Effects**: Shared packages contain **only types, schemas, validation utilities, and client contracts**. No direct database connection or business logic.
-2. **Semantic Versioning (SemVer)**:
-   * **MAJOR**: Breaking schema changes (e.g. field deletion).
-   * **MINOR**: Non-breaking additive changes (e.g. new optional tag).
-   * **PATCH**: Documentation or validation fix.
-3. **Automated Schema Codegen**: Protocol Buffers / JSON Schemas generate TypeScript interfaces, Rust structs, and C# classes for Unity (`COSYworld`).
+### 7.2 Governance Rules
+1. **Zero Runtime Side-Effects**: Shared packages contain **only types, schemas, validation utilities, and client contracts**.
+2. **Semantic Versioning (SemVer)**: Major for breaking schema changes, Minor for additive changes, Patch for bug fixes.
+3. **Automated Schema Codegen**: Protobuf / JSON Schemas generate TypeScript, Rust, and C# code.
 
 ---
 
-## 6. Shared Schemas
+## 8. Shared Schemas
 
 All ecosystem entities MUST conform to these canonical contracts.
-
-### 6.1 `ContentNode` Schema (TypeScript)
 
 ```typescript
 export type ContentType =
@@ -472,75 +571,23 @@ export interface ContentNode {
 }
 ```
 
-### 6.2 `UserProgressReference` Schema (Used by Consumer Apps)
-
-```typescript
-export interface UserProgressReference {
-  userId: string;
-  /** References canonical content in COSYstudio by cid */
-  contentCid: string;
-
-  /** Consumer-owned metric states */
-  masteryScore: number; // 0.0 to 1.0
-  srsIntervalDays: number;
-  lastReviewedAt: string;
-  nextReviewDueAt: string;
-  totalAttempts: number;
-  successfulAttempts: number;
-}
-```
-
 ---
 
-## 7. Migration Strategy
+## 9. Migration Strategy
 
 Migrating existing applications across all 11 repositories to the strict COSYstudio COS architecture follows a 5-phase zero-downtime plan.
 
-```
-Phase 1: Foundation Setup & Package Publishing (@cosy/*)
-   │
-   ▼
-Phase 2: Extraction & Deduplication into COSYstudio SSOT
-   │
-   ▼
-Phase 3: Dual-Read & Translation Shim Deployment
-   │
-   ▼
-Phase 4: Full Read-Switch & Consumer DB Content Purge
-   │
-   ▼
-Phase 5: Automated CI/CD Architectural Boundary Guardrails
-```
-
-### Phase 1: Foundation Setup & Package Publishing (Weeks 1–4)
-1. Publish `@cosy/schema-content`, `@cosy/schema-events`, and `@cosy/sdk-client`.
-2. Deploy COSYstudio Edge API gateway and CDN distribution layers.
-3. Establish NATS / Kafka event streaming infrastructure.
-
-### Phase 2: Extraction & Deduplication into COSYstudio (Weeks 5–8)
-1. Extract duplicate vocabulary, grammar, manuals, articles, and drill content from `COSYlanguages`, `COSYpractice`, `COSYmanuals`, `COSYgames`, and `COSYmagazine`.
-2. Run deduplication engine and assign immutable `cid_*` identifiers.
-3. Populate COSYstudio master database with normalized `ContentNode` graphs.
-
-### Phase 3: Dual-Read & ID Mapping Deployment (Weeks 9–12)
-1. Deploy ID mapping shims in consumer services (`COSYlanguages`, `COSYpractice`, `COSYevents`).
-2. Enable dual-read: consumer apps fetch by `cid` from COSYstudio with fallback to legacy local databases.
-3. Validate global latency (<15ms edge read) and caching behavior.
-
-### Phase 4: Full Read-Switch & Legacy Content Purge (Weeks 13–16)
-1. Route 100% of content reads across all 11 repos to COSYstudio Edge APIs.
-2. Drop content tables (dictionary, grammar, manual text, article markdown) from consumer databases (`COSYlanguages`, `COSYgames`, `COSYpractice`, `COSYmagazine`).
-3. Decommission legacy CMS interfaces in consumer repos.
-
-### Phase 5: CI/CD Architectural Guardrails (Continuous)
-1. Implement linters blocking new database tables storing content or translation strings in consumer repositories.
-2. Automate breaking schema change detection in PR pipelines for `@cosy/schema-content`.
+1. **Phase 1: Foundation Setup & Package Publishing (`@cosy/*`)**: Deploy edge CDN, NATS event bus, and shared packages.
+2. **Phase 2: Extraction & Deduplication into COSYstudio SSOT**: Extract raw content tables from consumer repos and deduplicate into canonical `ContentNode` graphs with `cid_*`.
+3. **Phase 3: Dual-Read & Translation Shim Deployment**: Enable consumer services to fetch content via `cid` while maintaining legacy fallback.
+4. **Phase 4: Full Read-Switch & Consumer DB Content Purge**: Route 100% of content reads to COSYstudio Edge APIs and purge raw content tables from consumer DBs.
+5. **Phase 5: Automated CI/CD Guardrails**: Enforce linter rules preventing raw content/translation tables from being introduced into consumer apps.
 
 ---
 
 ## Conclusion
 
-By positioning **COSYstudio** as the central **Content Operating System** across all 11 repositories in the `cosylanguages/` organization:
-* **Zero Content Duplication**: Content exists once in `COSYstudio` and is referenced by `cid`.
-* **Explicit Boundary Ownership**: Platform auth (`COSYplatform`), SRS pedagogy (`COSYlanguages`), drills (`COSYpractice`), spatial rendering (`COSYworld`), events (`COSYevents`), manuals (`COSYmanuals`), and analytics (`COSYdata`) remain cleanly isolated.
-* **Long-Term Scalability**: Content changes publish once and immediately propagate across web, mobile, 3D, micro-game, and help center applications.
+By combining modern creator UI paradigms (Notion blocks, Linear speed, Figma node visualizers) with a central Content Operating System architecture:
+* **Zero Content Duplication**: Every piece of content exists exactly once in `COSYstudio` and is referenced via `cid`.
+* **High Scale Capability**: Designed to support tens of thousands of Reusable Learning Objects (RLOs) seamlessly.
+* **Domain Ownership**: Clean isolation across all 11 `cosylanguages/` repositories.
