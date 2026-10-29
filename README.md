@@ -12,6 +12,16 @@ Designed as a modern, high-velocity database-first creator application inspired 
 
 Everything in COSYstudio is an atomic **Content Object (`ContentObject`)** identified by an immutable Content Identifier (`cid`). Dynamic database filtering and Airtable-like views replace traditional folder trees.
 
+## Visual Lesson Builder & Block-Based Engine
+
+COSYstudio includes a Notion-style drag-and-drop Visual Lesson Builder that operates on 100% native JSON documents (**Zero XML**):
+
+- **24 Draggable Blocks**: Heading, Rich text, Image, Gallery, Video, Audio, Dialogue, Vocabulary Table, Grammar Table, Timeline, Matching, Sorting, Gap Fill, Flashcards, Pronunciation, Speaking, AI Discussion, Quiz, Poll, Reflection, Homework, Teacher Notes, Assessment, Custom Extension.
+- **7 Lifecycle Contracts per Block**: Schema, Properties, Validation, Preview, Serialization, Rendering, Future Extensibility.
+- **Multiplayer Collaboration**: Yjs/CRDT WebSocket relay for real-time live co-authoring and cursor presence.
+- **Undo/Redo History Engine**: Non-blocking time-travel history stack (`Cmd+Z` / `Cmd+Shift+Z`).
+- **Reusable Templates**: Save and instantiate block sequences as reusable templates (`cid_template_*`).
+
 ## Complete Ecosystem Repositories & Boundaries (11 Repositories)
 
 | Repository | Domain Responsibility | Data Owned | Consumes From COSYstudio |
@@ -27,14 +37,6 @@ Everything in COSYstudio is an atomic **Content Object (`ContentObject`)** ident
 | **COSYmanuals** | Public Catalog & Gated Learning Manuals Portal | Manual metadata (`catalog/*.json`), Curriculum maps, Gated text | Manual documentation nodes (`cid_manual_*`), Tooltips |
 | **COSYmagazine** | Digital Publication, Flipbook & Podcast Station | Article JSON posts (`posts/*.json`), Podcast XML, Generated HTML | Article content nodes (`cid_article_*`), Inline Vocab |
 | **COSYworld** | Standalone Open-World RPG in COSY Town (14 Languages) | Town map hotspots, Player RPG state, COSY Passport saves | NPC Dialogue trees (`cid_dialogue_*`), Quest scripts |
-
-## Database-First Content Object Types (Folderless Paradigm)
-
-COSYstudio treats all entities as first-class `ContentObjects` with standardized metadata (Language, CEFR, Theme, Grammar, Skills, Age, Target Audience, Duration, Objectives, Status, Tags, Difficulty, Dependencies):
-
-- **Lesson** | **Dialogue** | **Vocabulary** | **Grammar** | **Exercise** | **Quiz** | **Image** | **Video** | **Audio** | **Prompt** | **Worksheet** | **Article** | **Quest** | **Game**
-
-Dynamic multi-dimensional filtering and view modes (Grid, Kanban Board, Gallery, Calendar, Node Graph Canvas) replace legacy nested folder trees.
 
 ## 12 Core Application Modules
 
@@ -58,19 +60,19 @@ COSYstudio consists of 12 modern, integrated modules engineered for high-scale R
 For complete detailed specifications, diagrams, matrices, shared schemas, and migration strategies, please refer to:
 
 - 📖 **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Full Principal Architect specification document.
-  - **Section 1**: Unified Content Object Model & Object Types (Folderless Paradigm)
-  - **Section 2**: Standardized Metadata Specification
-  - **Section 3**: Entity Relationship Diagrams (ERDs for Content Objects & Relations)
-  - **Section 4**: Airtable / Notion Database UI Paradigm (View Modes & Dynamic Filtering)
-  - **Section 5**: Verified Repository Boundary Analysis (11 Repositories)
-  - **Section 6**: Detailed 12 Application Modules
-  - **Section 7**: Shared Packages & Governance (`@cosy/...`)
+  - **Section 1**: Visual Lesson Builder & 100% JSON Block Engine (Zero XML)
+  - **Section 2**: 24 Lesson Builder Blocks & 7 Core Lifecycle Contracts
+  - **Section 3**: Real-Time Collaboration (Yjs CRDTs) & Undo/Redo Engine
+  - **Section 4**: Reusable Template Engine (`cid_template_*`)
+  - **Section 5**: Unified Content Object Model & Standardized Metadata
+  - **Section 6**: Entity Relationship Diagrams (ERDs for Content Objects & Relations)
+  - **Section 7**: Verified Repository Boundary Analysis (11 Repositories)
   - **Section 8**: 5-Phase Zero-Downtime Migration Strategy
 
 ## Guiding Architectural Axioms
 
-1. **Folderless Database-First**: Dynamic metadata filtering replaces nested folder hierarchies.
-2. **Content Centralization**: No downstream application creates or stores raw content tables.
-3. **Decoupled Identity (`cid`)**: Downstream applications store only immutable content IDs (`cid_*`).
-4. **Event-Driven Propagation**: Content updates publish via Kafka/NATS event bus to invalidate CDN/Redis caches.
-5. **Typed Schema Enforcement**: Shared `@cosy/schema-content` package ensures contract safety across web, mobile, 3D (Unity/C#), and backend services.
+1. **Zero XML & 100% JSON Engine**: Fast, clean, type-safe block serialization.
+2. **Folderless Database-First**: Dynamic metadata filtering replaces nested folder hierarchies.
+3. **Content Centralization**: No downstream application creates or stores raw content tables.
+4. **Decoupled Identity (`cid`)**: Downstream applications store only immutable content IDs (`cid_*`).
+5. **Event-Driven Propagation**: Content updates publish via Kafka/NATS event bus to invalidate CDN/Redis caches.
