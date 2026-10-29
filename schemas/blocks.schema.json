@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cosystudio.cosylanguages.com/schemas/blocks.schema.json",
+  "title": "Lesson Builder Blocks Contract",
+  "description": "JSON Schema contract for the 24 Lesson Builder blocks in COSYstudio",
+  "type": "object",
+  "required": ["blockId", "type"],
+  "properties": {
+    "blockId": {
+      "type": "string",
+      "pattern": "^block_[a-zA-Z0-9_-]+$"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "heading",
+        "rich_text",
+        "image",
+        "gallery",
+        "video",
+        "audio",
+        "dialogue",
+        "vocabulary_table",
+        "grammar_table",
+        "timeline",
+        "matching",
+        "sorting",
+        "gap_fill",
+        "flashcards",
+        "pronunciation",
+        "speaking",
+        "ai_discussion",
+        "quiz",
+        "poll",
+        "reflection",
+        "homework",
+        "teacher_notes",
+        "assessment",
+        "custom_extension"
+      ]
+    }
+  }
+}

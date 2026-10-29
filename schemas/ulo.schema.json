@@ -1,0 +1,181 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cosystudio.cosylanguages.com/schemas/ulo.schema.json",
+  "title": "Universal Learning Object (ULO)",
+  "description": "Canonical schema contract for all Universal Learning Objects in the COSYlanguages Content Operating System",
+  "type": "object",
+  "required": [
+    "cid",
+    "subtype",
+    "metadata",
+    "relationships",
+    "versioning",
+    "localization",
+    "payload",
+    "publicationTargets",
+    "createdBy",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "cid": {
+      "type": "string",
+      "pattern": "^cid_ulo_[a-zA-Z0-9_-]+$",
+      "description": "Unique Content Identifier - Primary Key across ecosystem"
+    },
+    "subtype": {
+      "type": "string",
+      "enum": [
+        "LESSON",
+        "EXERCISE",
+        "DIALOGUE",
+        "VOCABULARY_SET",
+        "GRAMMAR_TOPIC",
+        "ARTICLE",
+        "CONVERSATION_CLUB",
+        "QUEST",
+        "GAME_LEVEL",
+        "WORKSHEET",
+        "ASSESSMENT",
+        "AUDIO",
+        "VIDEO",
+        "IMAGE"
+      ]
+    },
+    "metadata": {
+      "type": "object",
+      "required": [
+        "targetLanguage",
+        "cefrLevel",
+        "theme",
+        "skills",
+        "ageGroups",
+        "targetAudiences",
+        "estimatedDurationSeconds",
+        "learningObjectives",
+        "status",
+        "tags",
+        "difficultyScore"
+      ],
+      "properties": {
+        "targetLanguage": {
+          "type": "string",
+          "enum": ["en", "fr", "it", "ru", "el", "es", "de", "pt", "hy", "ka", "ba", "br", "cv", "tt"]
+        },
+        "cefrLevel": {
+          "type": "string",
+          "enum": ["A0", "A1", "A2", "B1", "B2", "C1", "C2"]
+        },
+        "theme": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subTheme": {
+          "type": "string"
+        },
+        "grammarRuleCids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "skills": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["READING", "WRITING", "LISTENING", "SPEAKING", "PRONUNCIATION", "GRAMMAR", "VOCABULARY"]
+          }
+        },
+        "ageGroups": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["CHILDREN", "KIDS", "TEENS", "ADULTS", "BUSINESS"]
+          }
+        },
+        "targetAudiences": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["GENERAL", "SPOKEN", "EXAM", "PROFESSIONAL", "TRAVEL", "RELOCATION"]
+          }
+        },
+        "estimatedDurationSeconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "learningObjectives": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["DRAFT", "REVIEW", "STAGING", "PUBLISHED", "ARCHIVED", "DEPRECATED"]
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "difficultyScore": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "properties": {
+        "containsCids": { "type": "array", "items": { "type": "string" } },
+        "dependsOnCids": { "type": "array", "items": { "type": "string" } },
+        "explainsCids": { "type": "array", "items": { "type": "string" } },
+        "exercisesCids": { "type": "array", "items": { "type": "string" } },
+        "transformsToCids": { "type": "array", "items": { "type": "string" } },
+        "referencesMediaCids": { "type": "array", "items": { "type": "string" } },
+        "evaluatesCids": { "type": "array", "items": { "type": "string" } },
+        "variantCids": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "versioning": {
+      "type": "object",
+      "required": ["version", "semver", "activeAliases"],
+      "properties": {
+        "version": { "type": "integer", "minimum": 1 },
+        "semver": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "activeAliases": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "localization": {
+      "type": "object",
+      "required": ["titleLocKey", "translations"],
+      "properties": {
+        "titleLocKey": { "type": "string" },
+        "translations": { "type": "object" }
+      }
+    },
+    "payload": {
+      "type": "object"
+    },
+    "publicationTargets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "COSYlanguages",
+          "COSYworld",
+          "COSYgames",
+          "COSYmagazine",
+          "COSYevents",
+          "COSYmanuals",
+          "PDF_WORKSHEET",
+          "PRESENTATION",
+          "MOBILE_APP",
+          "REST_API"
+        ]
+      }
+    },
+    "createdBy": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  }
+}

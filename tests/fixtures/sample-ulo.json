@@ -1,0 +1,53 @@
+{
+  "cid": "cid_ulo_01H8X921VOCAB",
+  "subtype": "VOCABULARY_SET",
+  "metadata": {
+    "targetLanguage": "es",
+    "cefrLevel": "B1",
+    "theme": "housing",
+    "subTheme": "furniture",
+    "grammarRuleCids": ["cid_ulo_104GRAMMAR"],
+    "skills": ["VOCABULARY", "SPEAKING", "LISTENING"],
+    "ageGroups": ["ADULTS", "TEENS"],
+    "targetAudiences": ["GENERAL", "TRAVEL"],
+    "estimatedDurationSeconds": 300,
+    "learningObjectives": ["can_order_food_and_cutlery"],
+    "status": "PUBLISHED",
+    "tags": ["#dining", "#restaurant", "#cutlery"],
+    "difficultyScore": 45
+  },
+  "relationships": {
+    "containsCids": [],
+    "dependsOnCids": ["cid_ulo_101BASIC"],
+    "referencesMediaCids": ["cid_ulo_801AUDIO"]
+  },
+  "versioning": {
+    "version": 1,
+    "semver": "1.0.0",
+    "activeAliases": ["@latest", "@production"]
+  },
+  "localization": {
+    "titleLocKey": "loc_vocab_el_cubierto",
+    "translations": {
+      "en": { "title": "Cutlery / Silverware" },
+      "fr": { "title": "Les couverts" },
+      "ru": { "title": "Столовые приборы" }
+    }
+  },
+  "payload": {
+    "headword": "El Cubierto",
+    "primaryIpa": "/el kuˈβjeɾ.to/",
+    "partOfSpeech": "noun",
+    "grammaticalGender": "MASCULINE"
+  },
+  "publicationTargets": [
+    "COSYlanguages",
+    "COSYworld",
+    "COSYgames",
+    "COSYmagazine",
+    "PDF_WORKSHEET"
+  ],
+  "createdBy": "usr_author_anna",
+  "createdAt": "2026-03-01T10:00:00Z",
+  "updatedAt": "2026-03-01T10:00:00Z"
+}
