@@ -6,7 +6,7 @@ Welcome to the architectural specification for **COSYstudio**, the central Conte
 
 **COSYstudio is NOT an LMS.**
 
-An LMS or platform service manages user accounts, course enrollments, student rosters, event tickets, and subscriptions. **COSYstudio** is the single source of truth (SSOT) for all content creation, localization, versioning, taxonomy, media asset pipelines, and edge content distribution across all 11 repositories in the `cosylanguages/` organization.
+An LMS or platform service (`COSYplatform`) manages student logins, classroom hubs, teacher-student sessions, user accounts, event tickets, and subscriptions. **COSYstudio** is the single source of truth (SSOT) for all content creation, localization, versioning, taxonomy, media asset pipelines, and edge content distribution across all 11 repositories in the `cosylanguages/` organization.
 
 Designed as a modern, high-velocity block-based creator application inspired by **Notion**, **Linear**, **Figma**, **ProgressMe**, and **Edvibe**, COSYstudio powers thousands of Reusable Learning Objects (RLOs) without content duplication.
 
@@ -17,16 +17,16 @@ Content exists **once** in COSYstudio. Every other application references conten
 | Repository | Domain Responsibility | Data Owned | Consumes From COSYstudio |
 | :--- | :--- | :--- | :--- |
 | **COSYstudio** | Central Content Operating System (CMS, Localization, Asset Pipelines) | Content Nodes, Media Manifests, Localization Keys, Taxonomy | Core Provider |
-| **COSYplatform** | Central Identity Provider (SSO), Auth, Billing & Global API Gateway | User Auth Credentials, Billing & Subscription Plans | Localized legal strings & tier descriptions (`cid_loc_*`) |
-| **COSYlanguages** | Primary Language Learning Application & SRS Pedagogy Engine | User SRS card states, Lesson progress, Course rosters | `ContentNode` by `cid`, UI Localizations |
-| **COSYpractice** | Specialized Interactive Drill Engine & Speech Evaluation | Practice session runs, Audio recording submissions | Drill definitions (`cid_drill_*`), Audio prompts & rubrics |
-| **COSYworld** | Immersive 3D Spatial Language Environment Engine | Avatar cosmetics, Spatial instance state | NPC Dialogue trees, Quest scripts, Spatial Audio URLs |
-| **COSYgames** | Gamified Micro-Games, Matchmaking & Arcade Engine | Game sessions, High scores, Leaderboards | Gamepack bundles (`cid_gamepack_*`), Media |
-| **COSYtools** | Utility Tools: Dictionaries, CEFR Analyzers, Extensions | User tool preferences, Search cache | Direct dictionary query API, CEFR metadata |
-| **COSYdata** | Telemetry Ingestion, Data Lakehouse & AI/ML Pipelines | Behavioral telemetry logs, Trained ML models | Event streams (`content.published`), Taxonomy Tags |
-| **COSYmagazine** | Editorial Publishing & Digital Cultural Publication | Article comments, Reading bookmarks | Article content nodes (`cid_article_*`), Inline Vocab |
-| **COSYevents** | Live Webinars, Workshops, Meetups & WebRTC Rooms | Event schedules, RSVPs, Tickets, WebRTC tokens | Event material bundles (`cid_eventpack_*`), Media |
-| **COSYmanuals** | User Guides, App Documentation & Support Help Center | Support help tickets, Vote ratings | Documentation articles (`cid_manual_*`), Tooltips |
+| **COSYdata** | Canonical Machine-Readable Data & Vocabulary Hub | Vocabulary JSON datasets, IPA transcriptions, `themes.json` taxonomy | `content.published` event stream, updated RLO schemas |
+| **COSYplatform** | Virtual Classroom, Student/Teacher Hub & Authentication | User Auth Credentials, Classroom session state, Paid course rights | Structured lesson templates & RLOs by `cid` |
+| **COSYlanguages** | Main Free Public Front Door & Language Hub Portal | Portal UI state, `config.js` registry, Placement quiz state | Course catalog metadata & localized UI descriptors |
+| **COSYpractice** | Free Interactive Practice Engine (SRS, Drills, Wheel) | Browser local storage SRS state, Practice scores, Session metrics | Vocabulary RLOs, Grammar exercise blocks, CCQ prompts |
+| **COSYtools** | Client-Side Offline Reference Engine (Conjugators, Declensions) | Tool-specific datasets (`tools/<lang>/`), Sharded dictionaries | Headword definitions, conjugation tables & grammatical rules |
+| **COSYgames** | Suite of 20 Interactive Standalone Language Games | Game match state, Session scores, Local high score history | Mini-game content bundles (`cid_gamepack_*`) |
+| **COSYevents** | Public Calendar Directory & Session Material Repository | Event definitions (`event.json`), Session JSONs (`public-events.json`) | Session prompt decks (`cid_eventpack_*`), Media assets |
+| **COSYmanuals** | Public Catalog & Gated Learning Manuals Portal | Manual metadata (`catalog/*.json`), Curriculum maps, Gated text | Manual documentation nodes (`cid_manual_*`), Tooltips |
+| **COSYmagazine** | Digital Publication, Flipbook & Podcast Station | Article JSON posts (`posts/*.json`), Podcast XML, Generated HTML | Article content nodes (`cid_article_*`), Inline Vocab |
+| **COSYworld** | Standalone Open-World RPG in COSY Town (14 Languages) | Town map hotspots, Player RPG state, COSY Passport saves | NPC Dialogue trees (`cid_dialogue_*`), Quest scripts |
 
 ## 12 Core Application Modules
 
@@ -50,7 +50,7 @@ COSYstudio consists of 12 modern, integrated modules engineered for high-scale R
 For complete detailed specifications, diagrams, matrices, shared schemas, and migration strategies, please refer to:
 
 - 📖 **[ARCHITECTURE.md](./ARCHITECTURE.md)**: Full Principal Architect specification document.
-  - **Section 1**: Repository Boundary Analysis (11 Repositories: 5 questions each)
+  - **Section 1**: Verified Repository Boundary Analysis (11 Repositories)
   - **Section 2**: Navigation Architecture & Workspace Layout
   - **Section 3**: Detailed 12 Application Modules (Inspirations, Purpose & Core Features)
   - **Section 4**: Authoring & Content Workflows (Mermaid Sequence Diagrams)
