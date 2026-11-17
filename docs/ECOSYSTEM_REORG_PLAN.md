@@ -3,7 +3,7 @@
 Status: **proposal — approved; Phase 1 rescues executed and merged.**
 Owner: founder.
 Last surveyed: 2026-11-17 (all 13 repositories under `cosylanguages/`, read-only).
-Last updated: 2026-11-17 (Phase 1 rescues merged; converter project scoped, section 9).
+Last updated: 2026-11-17 (Phase 1 rescues merged; two plan corrections, sections 8.6–8.7).
 
 Nine changes outside this document have been made, all scoped to Phase 1:
 
@@ -21,6 +21,14 @@ Nine changes outside this document have been made, all scoped to Phase 1:
 One further project is scoped but **not** started: bringing the session converter up to
 the stored lessons, so the `spoken-en` set can be regenerated safely (section 9). Until
 then those artifacts are authoritative and must not be regenerated.
+
+**Two plan corrections found while scoping section 9, both material:**
+
+- **`COSYplatform-source` is the live content factory, not stale legacy** (section 8.7).
+  It holds the converter, the sanitizer, the publisher, the validators and 450 lessons.
+  Its deletion is now blocked, and the Phase 1 deletion order is reversed.
+- **Regeneration would be a downgrade, not a refresh** (section 8.6). The converter is
+  behind the artifacts it nominally produces.
 
 Everything else below is a proposal. No studio, schema, or site has been moved or
 deleted.
@@ -101,7 +109,7 @@ answer is simply "the founder", and this decision is already made.
 | COSYmagazine | 24M | 464 | yes | 2026-11-16 | Magazine Studio |
 | COSYmanuals | 84M | 5466 | yes | 2026-11-16 | Manuals Studio |
 | COSYplatform | 5.9M | 233 | yes | 2026-11-17 | Lesson Studio (app) |
-| COSYplatform-source | 33M | 1749 | **no** | 2026-10-15 | **Legacy** — old COSYplatform, planned for deletion |
+| COSYplatform-source | 33M | 1749 | **no** | 2026-10-15 | **Live content factory** — see 8.7; NOT stale legacy |
 | COSYpractice | 43M | 474 | yes | 2026-11-16 | Practice engine |
 | COSYtools | 83M | 856 | yes | 2026-11-16 | Reference engines |
 | COSYworld | 15M | 245 | yes | 2026-11-12 | Open-world RPG |
@@ -158,10 +166,17 @@ here is a risk, not just untidiness.
    `COSYpractice` (for example the whole confusion-pair set) and one file with
    `COSYmanuals`. Deletion must therefore be preceded by a sweep for anything that
    exists only there.
-3. **`COSYplatform-source` is the old `COSYplatform`.** It is stale, has no Pages
-   site, and is planned for deletion. It overlaps the current `COSYplatform` (six
-   identical shared JS files) and `COSYmanuals` (identical curriculum and workbook
-   data). Same caveat: sweep for content that exists only there before deleting.
+3. **`COSYplatform-source` is not stale legacy — it is the live content factory.** The
+   plan first called it "the old `COSYplatform`, stale, planned for deletion". That was
+   wrong and dangerous. It holds the content-production pipeline that the current
+   `COSYplatform` does not: `scripts/convert-session-to-lesson.py`,
+   `scripts/batch-convert-english-sessions.py`, `scripts/sanitize-student-lesson.js`,
+   `scripts/validate-lessons.js`, `scripts/publish_to_supabase.js`, and three active
+   workflows (Validate, Publish, Pages). It also holds 450 of the 451 `spoken-en`
+   lessons. `COSYplatform` has no publish workflow and no sanitizer at all. Deleting
+   this repository first, as the plan's Phase 1 ordering proposed, would destroy the
+   pipeline and the content together. Section 8.7 records the evidence and the corrected
+   ordering.
 4. **The studio kernel is vendored, not shared.** `studio-core.js` says so in its
    own header.
 5. **Design tokens are copied** rather than imported, and three of the copies have
@@ -247,8 +262,12 @@ The vocabulary import that previously blocked this phase is done (section 8.4), 
 `COSYlanguagesss` no longer needs to be held back for it. What remains is the
 classification of its non-vocabulary orphans.
 
-Order: `COSYplatform-source` first (no Pages site, so no live URL to preserve), then
-`COSYlanguagesss` (it has a Pages site, so it needs the archive window).
+Order: `COSYlanguagesss` first (it has a Pages site, so it needs the archive window),
+then `COSYplatform-source` **last, and only after its pipeline and content have been
+moved to `COSYplatform`** (section 8.7). The original ordering had this backwards: it
+put `COSYplatform-source` first on the reasoning that it had no Pages site. But its value
+is the content factory it holds, not a URL, and `COSYplatform` cannot yet produce or
+publish content without it.
 
 This is the largest clarity win, but it is **not** the lowest-risk step, because it
 depends on classifying roughly 3,600 files. One pass (`project/docs/`) is done; the
@@ -298,14 +317,18 @@ security divergence.
    before it is deleted? Section 5, Phase 1.
 3. **The 32 audit reports** in `COSYlanguagesss/project/docs/audits/`: archive them, or
    delete them? Section 8.3.
+4. **How should the content factory move?** `COSYplatform-source` holds the pipeline and
+   450 lessons that `COSYplatform` needs (section 8.7). Decide whether to move the
+   pipeline into `COSYplatform`, or to keep a publishing repository separate and
+   deliberate. This blocks the `COSYplatform-source` deletion.
 
 Resolved:
 - **Vocabulary import** — done. 5,532 entries that existed only in `COSYlanguagesss` are
   now in COSYdata, flagged `needs_review`. This cleared the blocker on deleting the
   legacy repository. Section 8.4.
-- `COSYlanguagesss` and `COSYplatform-source` are the old `COSYlanguages` and
-  `COSYplatform` respectively, and both are planned for deletion. Phase 1 treats them
-  accordingly.
+- `COSYlanguagesss` is the old `COSYlanguages`, and is planned for deletion.
+- `COSYplatform-source` is **not** simply the old `COSYplatform`. It is the live content
+  factory, and its deletion is blocked until the pipeline and lessons move (section 8.7).
 - **Studio access is gated by Supabase, not by repository location.** Every studio is
   reached only by a signed-in founder, enforced by `is_founder` row-level security.
   Section 4 reflects this: no public/private split of the studios is needed.
@@ -343,9 +366,10 @@ is equally dead. One further file references a placeholder SHA
 (`a1b2c3d4…abcdef…`) that never existed.
 
 Impact today is limited, because every affected file sits in a legacy repository
-(`COSYplatform-source`, `COSYlanguagesss`) or in a comment-only reference
-(`COSYmanuals` bootcamp pages). But it is the exact failure mode the pinned-URL
-pattern is supposed to avoid, and it is live in the plan's own recommended mechanism.
+(`COSYlanguagesss`) or in template and curriculum files inside `COSYplatform-source`.
+But section 8.7 shows `COSYplatform-source` is live, so those templates are not safely
+dormant, and it is the exact failure mode the pinned-URL pattern is supposed to avoid —
+live in the plan's own recommended mechanism.
 
 The comment-only references have since been removed (COSYmanuals PR #110); the
 `COSYmanuals` bootcamp pages use relative imports that all resolve. The remaining dead
@@ -628,6 +652,61 @@ pages (PR #110). Nothing was actually pinned there — the files use relative im
 all 102 references resolve — but the comment pointed at `f59a291e`, which returns 404.
 The `COSYplatform` `A1.html` files carry a similar comment, but theirs points at
 `273b517`, which resolves and is genuinely imported, so those were left alone.
+
+### 8.7 `COSYplatform-source` is the live content factory, not stale legacy
+
+Found while scoping section 9. The plan called `COSYplatform-source` "the old
+`COSYplatform`, stale, planned for deletion" and put it **first** in the deletion order
+because it has no Pages site. Both claims are wrong, and the ordering is backwards.
+
+**It is live.** The repository has three active workflows — "Validate Content &
+Integrity", "Publish Content to Supabase" and "Deploy to GitHub Pages" — and was last
+pushed 2026-10-15. The publish workflow triggers on pushes to `lessons/**` and to the
+publisher and sanitizer scripts themselves.
+
+**It holds the pipeline that `COSYplatform` does not have:**
+
+| Artefact | `COSYplatform-source` | `COSYplatform` |
+|---|---|---|
+| `scripts/convert-session-to-lesson.py` | yes | no |
+| `scripts/batch-convert-english-sessions.py` | yes | no |
+| `scripts/sanitize-student-lesson.js` | yes | no |
+| `scripts/validate-lessons.js` | yes | no |
+| `scripts/publish_to_supabase.js` | yes | no |
+| `.github/workflows/publish-content.yml` | yes | no |
+| `.github/workflows/validate-content.yml` | yes | no |
+| `lessons/spoken-en/` | 450 files | 4 files |
+
+**The sanitizer is a security control, not a utility.** `publish_to_supabase.js` calls
+`sanitizeStudentLessonContent()` on every lesson before it reaches Supabase
+(line 366), which is what keeps teacher notes and answer keys out of the student-facing
+view. `COSYplatform` has no sanitizer and no protected-keys check on publish. If the
+factory is deleted before that control is re-homed, content would be published to
+students unsanitised.
+
+**The content is not yet in `COSYplatform`.** Of the roadmap `lessonFile` references in
+`COSYplatform`, 214 resolve and **448 do not** (447 `spoken-en`, 1 `spoken-ru`). All 448
+are present in `COSYplatform-source`. So the lessons the current site's roadmaps point at
+live in the repository the plan wants to delete first.
+
+**What this changes:**
+
+1. The Phase 1 deletion order is reversed: `COSYplatform-source` goes **last**, after its
+   pipeline and content are moved. `COSYlanguagesss` goes first.
+2. Section 9 (the converter project) has a hard prerequisite: the converter must survive.
+   It lives only here, so it must be moved into `COSYplatform` before this deletion, or
+   section 9 is unachievable.
+3. A blocking decision is added (section 6, item 4): move the pipeline into
+   `COSYplatform`, or keep a separate publishing repository on purpose.
+4. The 33M/1,749-file inventory row is re-labelled. The earlier finding that "1,638 of
+   1,747 files exist nowhere else" should now be read as *content with no current home*,
+   which is exactly why it cannot simply be deleted.
+
+The safest immediate step is a move, not a deletion: bring `convert-session-to-lesson.py`,
+`batch-convert-english-sessions.py`, `sanitize-student-lesson.js`, `validate-lessons.js`
+and `publish_to_supabase.js` into `COSYplatform/scripts/`, together with the three
+workflows, and the `spoken-en`/`discussion-en` lessons. That is a reviewed change of its
+own, and it is a prerequisite for both this phase and section 9.
 
 ---
 
