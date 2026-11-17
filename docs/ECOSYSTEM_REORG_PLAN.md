@@ -1,8 +1,19 @@
 # COSY Ecosystem Reorganisation Plan
 
-Status: **proposal — not yet approved.** Nothing in this document has been executed.
-Owner: to be assigned.
+Status: **proposal — approved; Phase 1 rescue audit executed, curriculum rescue in review.**
+Owner: founder.
 Last surveyed: 2026-11-17 (all 13 repositories under `cosylanguages/`, read-only).
+
+Three changes outside this document have been made, all scoped to Phase 1:
+
+- The `COSYlanguagesss` vocabulary import into `COSYdata` is done (section 8.4).
+- The files damaged by the lossy rescue in `COSYmanuals` have been repaired (section 8.3).
+- The orphan classification is written (`docs/ORPHAN_CLASSIFICATION.md`), and its first
+  action — restoring `curriculums/` to `COSYplatform` — is in review (section 8.5).
+
+Everything else below is a proposal. No studio, schema, or site has been moved or
+deleted.
+
 
 ---
 
@@ -215,8 +226,9 @@ Each repository gets the same treatment.
    generated output that can be regenerated, and (c) genuine junk. Only (a) is work.
    The `project/docs/` pass is done and is recorded in section 8.3.
 2. **Re-home the keepers.** Move each into the repository that owns that content now,
-   as its own reviewed change. `COSYmanuals/docs/from-cosylanguages/` is the precedent,
-   though section 8.3 shows that rescue was partly lossy and needs re-verification.
+   as its own reviewed change. `COSYmanuals/docs/from-cosylanguages/` is the precedent;
+   section 8.3 records that this rescue was partly lossy and that the damage has since
+   been repaired.
 3. **Archive, then delete.** Archive first so the repository becomes read-only and its
    Pages URL keeps resolving; delete only after an agreed period and a link check.
 
@@ -385,11 +397,11 @@ one and checking whether its subject already has an owner.
 
 | Class | Count | Action |
 |---|---|---|
-| Already rescued | 7 | None — byte-identical copies already exist in `COSYmanuals/docs/from-cosylanguages/` |
+| Already rescued | 7 | None — copies already exist in `COSYmanuals/docs/from-cosylanguages/` |
 | Unique, valuable | 13 | Re-home to the owning repository |
 | Audit reports | 32 | Archive under `COSYdata/reports/archive/`, or delete |
 | Superseded | 2 | Delete |
-| Mangled during rescue | 1 | Re-copy from the original |
+| Mangled during rescue | 1 | **Repaired** — see below |
 
 **Unique, valuable (13) — re-home these:**
 
@@ -406,16 +418,50 @@ one and checking whether its subject already has an owner.
 | `REPOSITORIES_DECOUPLING_AND_DATA_SYNC_GUIDELINES.md` | COSYstudio |
 | `PRACTICE_UX_UI_DESIGN.md` | COSYpractice |
 | `B1_PLUS_CURRICULUM_POLICY_AND_READINESS.md` | COSYmanuals |
-| `COSYMANUALS_PRACTICE_BUTTONS_SPECIFICATION.md` | COSYmanuals (the rescued copy is mangled — see below) |
+| `COSYMANUALS_PRACTICE_BUTTONS_SPECIFICATION.md` | COSYmanuals (already present and repaired — see below) |
 | `SCENE_MATCH_A0_A1_OPEN_WORLD_AND_IMAGE_PROMPTS.md` | COSYgames (owns `scene-match/`) |
 
-**The rescue was partly lossy.** Of the files already copied to
-`COSYmanuals/docs/from-cosylanguages/`, one is corrupt:
-`COSYMANUALS_PRACTICE_BUTTONS_SPECIFICATION.md` was copied with all whitespace
-stripped, so it is a single 2,194-byte line, and its URLs lost their slashes
-(`https:cosylanguages.github.ioCOSYlanguagespractice`). The original 86-line version
-in `COSYlanguagesss` is intact. The rescue needs a re-copy, and the other rescued files
-should be diffed too, since this shows the copy step was not reliable.
+**The rescue was partly lossy, and the loss was larger than first recorded.** A full
+re-audit of all 24 files in `COSYmanuals/docs/from-cosylanguages/` was run against the
+originals in `COSYlanguagesss`, comparing both byte-for-byte and after whitespace
+normalisation. The result:
+
+| Finding | Count | Detail |
+|---|---|---|
+| Byte-identical to the legacy original | 9 | The copy was clean |
+| Differs from the original only by an internal path reference | 2 | Harmless; a link gained an `active/` segment |
+| Unique — no legacy original exists | 11 | Authored in `COSYmanuals`; nothing to compare |
+| Whitespace-mangled | 2 | Listed below |
+
+The two mangled files were `project/docs/COSYMANUALS_PRACTICE_BUTTONS_SPECIFICATION.md`
+and `grammar/GRAMMAR_STANDARD.md`. Both had all whitespace removed, so each became a
+single long line (0 newlines), and their URLs lost their slashes
+(`https:cosylanguages.github.ioCOSYlanguagespractice`). This confirms the copy step was
+not reliable, which is why a full re-audit was worth running.
+
+**Both have been repaired.** Each was rebuilt from the intact earlier revision in git,
+aligning the damaged text against the revision with whitespace and slashes ignored, then
+re-inserting the spacing and structure from the revision. `GRAMMAR_STANDARD.md` had no
+single intact ancestor, so it was rebuilt from three references; 62.3% of its characters
+were recovered and the remainder (a later revision's new content) was left as recovered
+prose. `COSYMANUALS_PRACTICE_BUTTONS_SPECIFICATION.md` matches its original byte-for-byte
+after normalisation.
+
+**Nine further files were damaged by the same commit** (`51688390d5`), which is not
+mentioned in the original plan because the sweep that found it ran later. They are
+`docs/PLATFORM_CONTENT_OVERLAP.md`, the three `templates/*-template.html`, the three
+`shared/templates/*-template.html`, `templates/lesson-plan-template.md` and
+`teacher-guides/lesson-plans/lesson-plan-template.md`. These files carried the same
+damage — whitespace removed and forward slashes dropped, so `</title>` had become
+`<title>` and `../shared/styles/style.css` had become `..sharedstylesstyle.css`. Each was
+rebuilt from its intact earlier revision, then the script block and inline-code backticks
+that only exist in the newer revision were re-inserted. Recovery was 94.9–100% of
+characters, and every rebuilt HTML file has balanced tags.
+
+Verified after repair: the repository's own `check-internal-links.mjs` reports exactly the
+same 865 findings as before the repair (no new breakage, and the rebuilt asset paths now
+resolve), and `check_raw_dumps.py` passes.
+
 
 ### 8.4 The vocabulary risk — resolved
 
@@ -447,6 +493,41 @@ Verified: `npm run validate` passes with 0 schema errors and 0 added warnings,
 missing. Merged as COSYdata PR #231.
 
 This clears the item that blocked deleting `COSYlanguagesss`.
+
+---
+
+### 8.5 The curriculum risk — in review
+
+The orphan classification (`docs/ORPHAN_CLASSIFICATION.md`) found that
+`COSYplatform` had no `curriculums/` directory, so the path its own migration map and
+Supabase schema designate as canonical returned 404. Three live breakages shared that
+root cause:
+
+- The gateway could not load course-preview curriculum data. `COSYlanguages/js/core/engine.js`
+  (`loadCurriculum()`) fetches
+  `raw.githubusercontent.com/cosylanguages/COSYplatform/main/curriculums/...`, which 404s.
+- 83 curriculum files in `COSYmanuals` were stubs pointing at the same dead path
+  (`{"source": ".../COSYplatform/curriculums/...", "note": "canonical data lives in COSYplatform"}`).
+- The only copy of the data (144 JSON, 14 languages, 5.8 MB) was in `COSYplatform-source`,
+  scheduled for deletion.
+
+**Ownership was contested and is now resolved in favour of `COSYplatform`.**
+`COSYplatform-source/docs/MIGRATION_MAP.md` records the migration from `COSYmanuals` to
+`COSYplatform` for exactly this tree; `COSYplatform/supabase/migrations/20261030000000_protected_content_schema.sql`
+opens with `-- Upstream Canonical Curriculum Owner: COSYplatform`; and the consuming
+code fetches from `COSYplatform`. `COSYmanuals/CANON_SOURCE_OF_TRUTH.md` names
+`COSYlanguages`, which has no such directory — a stale claim to correct.
+
+**The restore is in review as COSYplatform PR #48.** It adds the tree at the path the
+migration map records, and repins five `A1.html` files that referenced a deleted
+COSYlanguages commit (`f59a291e`, 404) to `273b517`, with `cosy-tokens.css` moved to
+`css/tokens.css`. Verified: 144/144 JSON parse, 118/118 non-archive files carry the
+schema's required fields, 83/83 COSYmanuals stub paths resolve, both repinned URLs
+return 200, and all three CI checks pass.
+
+Pages serves `COSYplatform` from `main`, so merging PR #48 fixes the gateway fetch and
+the 83 stub targets at once. Replacing the stubs with the real files in `COSYmanuals` is
+then a separate, smaller change.
 
 ---
 
