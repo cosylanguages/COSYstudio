@@ -19,21 +19,48 @@ weight or a move of existing, working files.
 
 ## 2. The decision that has to come first
 
-Two targets are coherent. Everything else depends on this choice.
+Right now the ecosystem is 13 separate repositories. The question is how much to
+change that.
 
-**Option A — keep the product split, make `COSYstudio` the shared platform layer (recommended).**
-Keep the public products as separate repositories and Pages sites. `COSYstudio`
-becomes the single owner of the cross-cutting layer: design tokens and components,
-shared JSON schemas, the studio kernel, and the authoring studios. Products consume
-that layer and stop copying it.
+**Option A — keep 13 repositories, clean up what is inside them (recommended).**
+Each product keeps its own repository and its own live website. We only fix the
+duplication: the six copies of the CMS editor become one, the copied CSS files become
+one, and the studios move into `COSYstudio`. Nothing about how the sites are served
+changes, and no URL changes.
 
-**Option B — collapse into one monorepo.**
-One repository with `apps/*` and `packages/*`. The strongest de-duplication, but it
-is a big-bang migration of 13 repositories with live Pages sites, and it contradicts
-the current ecosystem principle that each element lives in the repository that owns it.
+**Option B — merge everything into one big repository.**
+One repository holding all the products in subfolders. It removes duplication
+completely, but every product's website would have to be rebuilt and redeployed from
+the new location, all 13 repositories would need migrating at once, and it breaks the
+current rule that each thing lives in the repository that owns it. It is a much bigger
+and riskier job for a similar end result.
 
-Option A is recommended: it is incremental, keeps every live URL stable, and can be
-done one repository at a time. The rest of this document assumes Option A.
+Recommendation: **Option A.** It fixes the real problems (duplication and drift) with
+work that can be done one repository at a time and checked as it goes.
+
+In plain terms: Option A is "tidy the house". Option B is "knock down the house and
+rebuild it".
+
+---
+
+## 2b. Who owns the shared layer
+
+"Shared layer" means the files that more than one product needs: the design tokens,
+the base CSS, the CMS editor, the studio kernel.
+
+Today nobody owns them. That is the actual problem. Each repository keeps its own
+copy, so there are six CMS editors, four `base.css` files, and so on. When one copy is
+fixed, the others are not. That is why the six CMS editors have all drifted apart.
+
+"Who owns it" just means: **when a shared file needs a change, whose pull request is
+it, and who approves it?** Somebody has to be the owner, or the copies drift again.
+
+The proposal is that `COSYstudio` owns them, and the work is: move each shared file
+there once, then have the products use that one copy instead of keeping their own.
+
+This is a process question, not a technical one. It needs one name: the person who
+reviews changes to shared files. It can be you. If there is only one maintainer, the
+answer is simply "the founder", and this decision is already made.
 
 ---
 
@@ -126,49 +153,40 @@ here is a risk, not just untidiness.
 
 ## 4. Target architecture (Option A)
 
-`COSYstudio` is founder-only. That is a hard constraint on the architecture, because a
-private repository cannot serve files to public sites: a browser on a public Pages site
-cannot fetch a `raw.githubusercontent.com` URL from a private repository, and the API
-returns `404` to unauthenticated clients. The shared layer therefore splits in two.
+One shared layer, in `COSYstudio`.
 
-### 4.1 Two shared layers
+The important correction: **studio access is not controlled by where the code lives.**
+Every studio is reached only by a signed-in founder, and the gate is Supabase — a
+founder login plus row-level security (`is_founder` policies, present across the
+studio migrations). `studio-core.js` states this in its own header: "The real gate for
+publishing is always the database (row level security)."
 
-| Layer | Repository | Visibility | Owns | Consumed by |
-|---|---|---|---|---|
-| Public shared layer | **COSYlanguages** | public | Design tokens, base CSS, shared components, public resolvers | Every public product, by pinned-SHA import |
-| Private shared layer | **COSYstudio** | founder only | Studio applications, ULO and block schemas, studio kernel, content pipeline tooling | The founder, and CI |
-| Gateway | COSYlanguages | public | Hub, placement quiz, course catalogue | End users |
-| Products | practice, tools, games, events, magazine, manuals, world, platform | public | Their own content and engines | End users |
-| Data | COSYdata | public | Canonical datasets | Products |
+So moving studio code into `COSYstudio` does not change who can use a studio. The
+files may be publicly readable and it would still be safe, because the data behind
+them is not. This removes the need for any public/private split of the studios.
 
-The rule is simple: **anything a public page loads must live in a public repository.**
-Anything that only the founder runs may live in `COSYstudio`.
+### 4.1 One caveat, and only one
 
-### 4.2 What this changes about the studios
+If the `COSYstudio` repository is private, then a public page cannot import a file
+from it (a browser cannot read `raw.githubusercontent.com` for a private repo).
 
-Moving the studios into `COSYstudio` also moves them from public Pages sites to a
-founder-only surface. Today all six studios are reachable from public repositories —
-for example `COSYevents/studio.html` and `COSYevents/shared/js/studio.js` are public
-files. After the move they are not.
+That matters for exactly one thing: the handful of assets that *public* pages load —
+design tokens and base CSS. Those must stay in a public repository. `COSYlanguages`
+is public, already serves them, and is the natural home.
 
-That is a change in access model, not just location, so each studio move must also
-decide what the public repository keeps: typically nothing, with the public site
-linking out to nothing and the studio simply being a founder tool.
+Everything else — studios, schemas, the studio kernel — has no public consumer, so it
+can live in `COSYstudio` either way.
 
-This does not make studio content secret. The studios already gate on role in the
-browser, and the real gate is database row-level security, as `studio-core.js` states
-in its own header. Founder-only repository access is about who may change the tooling.
+| Layer | Repository | Owns |
+|---|---|---|
+| Shared platform | **COSYstudio** | Studios, ULO and block schemas, studio kernel, content pipeline tooling |
+| Public shared assets | COSYlanguages | Design tokens, base CSS, shared components |
+| Gateway | COSYlanguages | Hub, placement quiz, course catalogue |
+| Products | practice, tools, games, events, magazine, manuals, world, platform | Their own content and engines |
+| Data | COSYdata | Canonical datasets |
 
-### 4.3 Where the shared kernel goes
-
-`studio-core.js` is loaded by studio pages that today sit on public Pages sites. Once
-the studios live in `COSYstudio`, the kernel moves with them and there is no public
-consumer left. So the kernel belongs in the private layer, and the public layer holds
-only what public pages actually load: tokens, base CSS and components.
-
-Every product keeps its own repository, its own Pages site, and its own URL. What
-changes is that each shared file has exactly one home, in the layer that matches who
-loads it.
+Every product keeps its own repository, its own Pages site, and its own URL. Each
+shared file gets exactly one home.
 
 ---
 
@@ -181,10 +199,6 @@ carry no functional risk.
 - Land this document.
 - Add a one-page "where does X live?" decision table to each affected README so the
   boundary is written down before anything moves.
-- **Settle `COSYstudio` visibility first.** It is public with Pages enabled today,
-  which contradicts the founder-only intent (section 8.1). Make the repository private
-  and disable Pages, or record that it is intentionally public. Nothing moves into
-  `COSYstudio` until this is done.
 
 ### Phase 1 — Delete the legacy repositories
 Both legacy repositories are already decided for deletion. They are still not safe
@@ -252,20 +266,19 @@ security divergence.
 
 ## 6. Open decisions (blocking)
 
-1. **Option A or Option B?** Section 2.
-2. **Ownership**: who reviews and merges changes to the shared layer?
-3. **Legacy deletion window**: how long should an archived repository sit read-only
+1. **Option A or Option B?** Section 2. Recommendation: A.
+2. **Legacy deletion window**: how long should an archived repository sit read-only
    before it is deleted? Section 5, Phase 1.
-4. **Studio visibility after the move**: with `COSYstudio` founder-only, should any
-   studio remain publicly reachable, or do all six become founder tools?
 
 Resolved:
 - `COSYlanguagesss` and `COSYplatform-source` are the old `COSYlanguages` and
   `COSYplatform` respectively, and both are planned for deletion. Phase 1 treats them
   accordingly.
-- `COSYstudio` is founder-only. Section 4 restructures the target architecture around
-  this: the shared layer splits into a public half (in `COSYlanguages`) and a private
-  half (in `COSYstudio`).
+- **Studio access is gated by Supabase, not by repository location.** Every studio is
+  reached only by a signed-in founder, enforced by `is_founder` row-level security.
+  Section 4 reflects this: no public/private split of the studios is needed.
+- **Shared-layer ownership**: if the founder is the only maintainer, the founder owns
+  it, and this is already decided. Section 2b.
 
 ---
 
@@ -283,11 +296,11 @@ Resolved:
 | Risk | Mitigation |
 |---|---|
 | Pinned-URL imports break if a tag is force-moved | Import by immutable commit SHA, never a branch. See the live example in section 5, Phase 1 |
-| A private repo is imported by a public page | Keep public loads in `COSYlanguages`; never import from `COSYstudio` in a public page |
+| A private repo is imported by a public page | Keep the public assets (tokens, base CSS) in `COSYlanguages`; never import those from `COSYstudio` if it is private |
 | Archiving a repository breaks inbound links | Diff and grep for inbound links first; archive (not delete) so URLs keep resolving |
 | The six CMS editors have real behavioural differences | Reconcile into one contract and port the strictest checks before replacing |
 | Moving studios breaks their Supabase coupling | Move Lesson Studio last, after the shared package boundary is proven |
-| Two repositories both claim the same content | Resolve ownership in Phase 1 before any move |
+| Two repositories both claim the same content | Decide which repository owns that content in Phase 1, before any move |
 
 ### 8.1 Live findings that need a fix regardless of this plan
 
@@ -306,11 +319,12 @@ The lesson is that a pinned SHA must be verified at the moment it is written and
 checked by CI thereafter. Phase 5 should include a check that every pinned URL
 resolves.
 
-**`COSYstudio` is public and serving Pages today.** The repository is `public` with
-Pages enabled, and `https://cosylanguages.github.io/COSYstudio/` returns `200`. This
-contradicts the stated founder-only intent, so it needs an explicit fix: make the
-repository private and disable Pages, or confirm it is meant to be public. Nothing in
-this plan should move into `COSYstudio` until that is settled.
+**`COSYstudio` is public with Pages enabled.** The repository is `public`, Pages is
+enabled, and `https://cosylanguages.github.io/COSYstudio/` returns `200`. This is
+harmless for the studios, because they are gated by Supabase rather than by repository
+visibility. It is worth confirming it is intended, since the repository is described as
+founder-only. Making it private is safe as long as the public shared assets (tokens and
+base CSS) live in `COSYlanguages`, per section 4.1.
 
 ---
 
