@@ -3,9 +3,9 @@
 Status: **proposal — approved; Phase 1 rescues executed and merged.**
 Owner: founder.
 Last surveyed: 2026-11-17 (all 13 repositories under `cosylanguages/`, read-only).
-Last updated: 2026-11-17 (Phase 1 rescues merged).
+Last updated: 2026-11-17 (Phase 1 rescues merged; converter project scoped, section 9).
 
-Eight changes outside this document have been made, all scoped to Phase 1:
+Nine changes outside this document have been made, all scoped to Phase 1:
 
 - The `COSYlanguagesss` vocabulary import into `COSYdata` is done (section 8.4).
 - The files damaged by the lossy rescue in `COSYmanuals` have been repaired (section 8.3).
@@ -15,8 +15,12 @@ Eight changes outside this document have been made, all scoped to Phase 1:
 - The 153 authored lessons are restored to `COSYplatform`, sanitized (section 8.6).
 - The three derived lessons `classroom.html` pointed at are restored, sanitized, so all
   nine classroom lesson options resolve (section 8.6).
-- The scene art is rescued into `COSYgames`, and the legacy blog into `COSYmagazine`
-  (section 8.6).
+- The scene art is rescued into `COSYgames` (section 8.6).
+- The legacy blog is adopted into `COSYmagazine` (section 8.6).
+
+One further project is scoped but **not** started: bringing the session converter up to
+the stored lessons, so the `spoken-en` set can be regenerated safely (section 9). Until
+then those artifacts are authoritative and must not be regenerated.
 
 Everything else below is a proposal. No studio, schema, or site has been moved or
 deleted.
@@ -572,16 +576,34 @@ The three derived files `classroom.html` referenced
 `spoken-en/how-to-love-your-work.xml`) were restored in a follow-up (PR #53). All nine
 `classroom.html` lesson options now resolve, up from six.
 
-**Regeneration is not reproducible, which changes how these should be treated.** The 451
-`spoken-en/*.xml` files carry a provenance header pointing at a COSYevents session, and
+**Regeneration would be a downgrade, not a refresh.** The 451 `spoken-en/*.xml` files
+carry a provenance header pointing at a COSYevents session, and
 `scripts/convert-session-to-lesson.py` can rebuild them, so the plan first recorded them
-as "regenerable". Re-running the converter on the three above does **not** reproduce the
-stored files: the COSYevents sources have moved on, so the output differs in slide count,
-stage names, duration and vocabulary markup, and the converter also writes to
-`roadmaps/*.json` as a side effect. The artifacts were therefore rescued and sanitized
-rather than regenerated, to avoid a silent content change to live lessons. Regenerating
-the whole `spoken-en` set from current sources is a separate, deliberate task, and until
-it is done those 448 files remain derived-but-unreproducible, not safely regenerable.
+as "regenerable". Trialling the converter on eight representative sessions showed the
+opposite: every regenerated file is materially poorer than the stored one.
+
+| | Stored | Regenerated |
+|---|---|---|
+| Total size (8 files) | 171,093 B | 105,224 B (62%) |
+| `stage="round-N"` per file | 4 | 0 |
+| group/individual mode pairs per file | 6 | 1 |
+
+Across the whole set, 450/451 files carry `round-N` stages, 450/451 carry an individual
+mode, and 451/451 carry teacher notes — none of which the converter emits. It produces
+generic `warm-up`/`freer-practice` stages and a single mode instead.
+
+The history explains it. The stored files come from `00f9a81` ("curriculum-enrichment
+pass 1 and 2"), while the converter's last change is `86bbf1f` ("Adapt Special Discussion
+lessons for multi-duration formats ... group-only"). The converter is **behind** the
+artifacts it nominally produces: the lessons were hand-enriched after generation. Running
+it now would strip the round structure, the group/individual mode pairing and the
+multi-duration support from 450 live lessons. It also rewrites `roadmaps/*.json` as a
+side effect.
+
+The artifacts were therefore rescued and sanitized rather than regenerated. **The stored
+files are the good copies.** Bringing the converter up to their standard, and only then
+regenerating, is scoped separately in section 9; until that is done the remaining 448
+`spoken-en` files must not be regenerated.
 
 **The scene art → `COSYgames` (PR #108).** 13 scene backgrounds from
 `COSYlanguagesss/images/scenes` were restored to `COSYgames/images/scenes`.
@@ -606,6 +628,58 @@ pages (PR #110). Nothing was actually pinned there — the files use relative im
 all 102 references resolve — but the comment pointed at `f59a291e`, which returns 404.
 The `COSYplatform` `A1.html` files carry a similar comment, but theirs points at
 `273b517`, which resolves and is genuinely imported, so those were left alone.
+
+---
+
+## 9. Scoped project: bring the session converter up to the stored lessons
+
+Separate from this reorganisation. Not started, and deliberately not bundled with the
+Phase 1 rescues.
+
+### Why it is needed
+
+`scripts/convert-session-to-lesson.py` nominally regenerates the 451 `spoken-en/*.xml`
+lessons from `COSYevents/sessions/*`. It cannot today, because the stored lessons are
+richer than anything it emits (section 8.6): round stages, group/individual mode pairs
+and multi-duration support are all missing from its output. Regenerating with it as it
+stands would delete that enrichment from 450 live lessons.
+
+### What the converter has to produce
+
+Derived by comparing its output to the stored set:
+
+| Feature | Stored lesson | Converter today |
+|---|---|---|
+| Stages | `warm-up`, `round-1`, `round-2`, `speak-together`, `error-correction` | `lead-in`, `warm-up`, `adaptation`, `freer-practice`, `cool-down` |
+| Modes | `mode="group"` and `mode="individual"` per round | a single mode |
+| Durations | one lesson serving 50/80/110m | a fixed `duration` per slide |
+| Vocabulary | `<cosy-blockquote importance="basic">` items | `<cosy-vocabulary-item>` |
+| Round content | `round-item-main` and `round-item-personal` split | not split |
+
+### Suggested shape
+
+1. **Freeze the target.** Pick one stored lesson and one `COSYevents` session and write
+   down, side by side, exactly what the output must contain. That pairing is the spec.
+2. **Extend the converter** to emit round stages, both modes per round, the duration
+   variants and the round-item split.
+3. **Make it idempotent.** Regenerating a lesson that is already current must produce a
+   byte-identical file, so a clean `git status` means "no change". Today it is not
+   idempotent, and it rewrites `roadmaps/*.json` as a side effect, which it should stop
+   doing or do behind an explicit flag.
+4. **Verify on one session** before scaling: run it, diff against the stored file, and
+   confirm the only differences are intended.
+5. **Then regenerate the set**, one club at a time, with a diff review per club. The
+   `karaoke-club` sessions are excluded from the current set and need a decision.
+
+### Definition of done
+
+- Regenerating a current lesson yields no diff.
+- Regenerating the full `spoken-en` set yields only intended changes, reviewed club by
+  club.
+- Sanitisation still passes (`scripts/sanitize-student-lesson.js`, then
+  `scripts/check_protected_keys.js`).
+
+Until this is done, the stored artifacts are authoritative and must not be regenerated.
 
 ---
 
