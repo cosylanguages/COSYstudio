@@ -26,8 +26,11 @@ Targets compared against:
 is produced from a source that still exists, or is superseded by a newer owner.
 "Junk" means caches, drafts with no consumer, and abandoned experiments.
 
-Two findings below are **live defects that need a fix regardless of this plan** and are
+Six findings below are **live defects that need a fix regardless of this plan** and are
 not merely reorganisation work. They are flagged in place.
+
+Three rescues are executed and in review: `curriculums/` (COSYplatform PR #48),
+`activities/`, `data/` and `docs/` (COSYplatform PR #49).
 
 ---
 
@@ -144,14 +147,29 @@ Class (b), with one caveat: **the generator is the asset, not its output.** If
 `curriculums/` is rescued (§1.1) and `build_all_modules.py` is kept, the 685 files
 regenerate. Do not migrate 686 placeholder files.
 
-### 1.4 `reference/` — 56 unique · **MOVE**
+### 1.4 `reference/` — 56 unique · **SPLIT — needs a decision**
 
-53 grammar unit plans under `reference/grammar/en/lessons/` (CELTA-style: lead-in,
-meaning check, target structure — e.g. `part-4-pronouns.json`), plus three READMEs.
-No copy in either target. Class (a). `COSYmanuals` is the natural owner (it already
-holds `data/grammar/reference/` for Russian).
+Two different things share this tree.
 
-### 1.5 `cefr/` — 17 unique · **MOVE**
+**The portal** — `reference/{manuals,grammar,vocabulary}/README.md`. These are index
+pages that deep-link out to `COSYmanuals` (`https://cosylanguages.github.io/COSYmanuals/manuals/{iso}/grammar/{level}/topics/{topic}.html`).
+`MIGRATION_MAP.md` records them as "placeholder README created" for
+"COSYlanguages (Separate migration)", so they belong to `COSYplatform` as the
+platform-side portal.
+
+**The lesson plans** — 53 CELTA-style unit plans under `reference/grammar/en/lessons/`
+(`leadIn`, `meaningCheck`, `targetStructure`), plus two READMEs. These are authored
+content, not portal pages. All 53 filenames match published
+`COSYmanuals/manuals/en/grammar/*/topics/*.html` topics exactly (53 of 53), which
+suggests `COSYmanuals` is the natural owner, but no generator or consumer references
+them, so the link is by name only.
+
+**Blocking contradiction.** `COSYmanuals/docs/MANUALS_MIGRATION_STATUS.md` states that
+`reference-grammar/` and `curriculum/` belong to `COSYlanguages` and "remain live in
+`COSYlanguages`". That is stale — `COSYlanguages` has never contained either directory
+(checked across all history). Resolve the intended owner before moving.
+
+### 1.5 `cefr/` — 17 unique · **MOVE (needs reconciliation)**
 
 The canonical CEFR master: `CEFR_Universal_Master.md`, `CHANGELOG.md`, `README.md`,
 eight data files (`abilities`, `descriptors`, `functions`, `levels`, `meta`, `scales`,
@@ -159,10 +177,10 @@ eight data files (`abilities`, `descriptors`, `functions`, `levels`, `meta`, `sc
 
 None of these eight data files match any file in `COSYdata` by content hash (0 of 8).
 Three names do exist in `COSYdata` with different content — `levels.json` in
-`taxonomy/`, `themes.json` in `schemas/`, `descriptors.json` under
-`vocabulary/ru/b2/` — so a naive name-based merge would collide. `COSYdata` holds a
+`taxonomy/`, `themes.json` in `schemas/` and `taxonomy/`, `descriptors.json` under
+`vocabulary/{lang}/b2/` — so a naive name-based merge would collide. `COSYdata` holds a
 *draft* unified reference; this is the master. Class (a). `COSYdata` is the owner, and
-the three name collisions need reconciling rather than overwriting.
+the name collisions need reconciling rather than overwriting.
 
 ### 1.6 `scripts/` — 35 unique · **SPLIT**
 
@@ -173,7 +191,7 @@ of them these. Class (a) for the tooling — but only if the content it builds i
 
 `__pycache__/*.pyc` (2 files) are class (c).
 
-### 1.7 `docs/` — 19 unique · **MOVE**
+### 1.7 `docs/` — 19 unique · **MOVED (done — PR #49)**
 
 Architecture and specification documents: `CONTENT_MODEL.md`, `DATABASE.md`,
 `MIGRATION_MAP.md`, `architecture.md`, `lesson-format-spec.md`,
@@ -183,8 +201,15 @@ Architecture and specification documents: `CONTENT_MODEL.md`, `DATABASE.md`,
 `supabase-live-class.md`, `teacher-catalog-guide.md`, plus
 `curriculum-enrichment-log.md` (175 KB) and `roadmap-lesson-resolution.json` (247 KB).
 
-Class (a). `COSYmanuals` owns specs; `COSYstudio` owns ecosystem architecture. Split by
-subject.
+These describe `COSYplatform` itself ("COSYplatform Internationalisation",
+"Supabase Live Classroom Integration", "CosyLanguages Platform Architecture"), so
+`COSYplatform` is the owner — not `COSYmanuals`, as the plan first assumed. Restored
+as COSYplatform PR #49.
+
+Two filenames collide with existing `COSYmanuals/docs/` files
+(`a0-a1-unit-crosswalk.md`, `lesson-spec-a0-a1-general.md`). They are genuinely
+different documents of the same name, so there is no conflict — but note that a
+later name-based dedup would wrongly merge them.
 
 ### 1.8 `shared/` — 18 unique · **SPLIT**
 
@@ -210,11 +235,11 @@ migration-history record if wanted.
 
 | Path | Unique | Class | Note |
 |---|---|---|---|
-| `templates/` | 6 | (a) | `communication/`, `grammar/` template HTML — no target copy |
-| `roadmaps/` | 4 | (a) | `discussion-en-{a2,b1,b2,c1}.json` — COSYplatform has 55 roadmaps, not these |
-| `activities/` | 3 | (a) | `games.json`, `print.json`, `tools.json` |
-| `data/` | 2 | (a) | `conversion-map.json`, `platform-stats.json` |
-| `teacher-guides/` | 2 | (a) | `index.html`, `lesson-plans/lesson-plan-template.md` |
+| `templates/` | 6 | (a) | `curriculum-template.html`, `unit-template.html`, `communication/{index,unit}-template.html`, `grammar/{lesson,roadmap}-template.html` — no target copy; the two that overlap by name with `COSYmanuals` are different files |
+| `roadmaps/` | 4 | (b) | **Superseded, not orphan.** `discussion-en-{a2,b1,b2,c1}.json` are empty stubs (`totalLessons` 0, 0, 0, 1); `COSYplatform` already holds the same four with 8, 28, 15 and 7 lessons, and the one source lesson id appears there. Drop. |
+| `activities/` | 3 | (a) | `games.json`, `print.json`, `tools.json` — **moved (PR #49)** |
+| `data/` | 2 | (a) | `conversion-map.json`, `platform-stats.json` — **moved (PR #49)** |
+| `teacher-guides/` | 2 | (b) | **Superseded, not orphan.** `COSYmanuals/teacher-guides/` already holds both files in a newer form (split `tokens.css` styles, added wording); the source copies are older. Drop. |
 | `reports/` | 3 | (b)/(c) | Two audit reports (point-in-time) + one `needs-review` note |
 
 ---
@@ -355,7 +380,8 @@ These are not reorganisation work. They are broken today.
    That is the single highest-value action in Phase 1.
 
 4. **The dead pinned imports** already recorded in plan §8.1 (19 files pinned to
-   `f59a291e…`, 2 to `ba14a13d…`, 1 placeholder SHA). Confirmed still present.
+   `f59a291e…`, 2 to `ba14a13d…`, 1 placeholder SHA). Confirmed still present. The
+   five in `curriculums/` were fixed by PR #48; the rest remain.
 
 5. **Three documents disagree on curriculum ownership.**
    `COSYplatform-source/docs/MIGRATION_MAP.md` and the `COSYplatform` Supabase schema
@@ -364,21 +390,30 @@ These are not reorganisation work. They are broken today.
    the code that consumes the data fetches from `COSYplatform`, so `COSYplatform` is
    the owner. The stale document should be corrected.
 
+6. **A second stale ownership claim.** `COSYmanuals/docs/MANUALS_MIGRATION_STATUS.md`
+   says `reference-grammar/` and `curriculum/` "remain live in `COSYlanguages`". Neither
+   directory has ever existed there, so this blocks the `reference/` rescue (§1.4) and
+   should be corrected.
+
 ---
 
 ## 4. Recommended order for Phase 1 step 2
 
 1. **Restore `curriculums/` into `COSYplatform`** (§1.1) — fixes three live breakages
-   from one root cause; do it first.
-2. **Rescue the small authored sets** — `reference/`, `cefr/`, `docs/`, `templates/`,
-   `roadmaps/`, `activities/`, `teacher-guides/`, `data/` (§1.4–1.10).
-3. **Rescue the 153 authored lessons** (§1.2) — needs a decision on the owning repo.
-4. **Rescue scene and language images** (§2.3).
-5. **Rescue the blog** (§2.4) — needs an owner decision.
-6. **Rescue strategic docs** (§2.6) and the remaining small groups.
-7. **Drop** the regenerable sets (`drafts/`, derived lessons, superseded i18n and
-   Supabase schema) and the junk (`__pycache__`, old tests, planning notes).
+   from one root cause. **Done, in review as PR #48.**
+2. **Rescue the platform's own content** — `activities/`, `data/`, `docs/` (§1.7, §1.10).
+   **Done, in review as PR #49.**
+3. **Rescue the remaining small authored sets** — `templates/` (§1.10), then `cefr/`
+   (§1.5) once its three name collisions are reconciled.
+4. **Decide the owner of `reference/`** (§1.4) — the 53 English lesson plans, blocked
+   by the stale `COSYmanuals/docs/MANUALS_MIGRATION_STATUS.md` claim.
+5. **Rescue the 153 authored lessons** (§1.2) — needs a decision on the owning repo.
+6. **Rescue scene and language images** (§2.3).
+7. **Rescue the blog** (§2.4) — needs an owner decision.
+8. **Rescue strategic docs** (§2.6) and the remaining small groups.
+9. **Drop** the regenerable sets (`drafts/`, derived lessons, superseded i18n and
+   Supabase schema, the stub roadmaps and the older teacher-guides) and the junk
+   (`__pycache__`, old tests, planning notes).
 
-Steps 1, 3 and 5 need a decision before they can be executed (ownership for step 1,
-owning repository for step 3, adopt-or-retire for step 5). Everything else is
+Steps 4, 5 and 7 need a decision before they can be executed. Everything else is
 mechanical once the target repository is agreed.
