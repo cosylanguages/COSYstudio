@@ -26,11 +26,12 @@ Targets compared against:
 is produced from a source that still exists, or is superseded by a newer owner.
 "Junk" means caches, drafts with no consumer, and abandoned experiments.
 
-Six findings below are **live defects that need a fix regardless of this plan** and are
-not merely reorganisation work. They are flagged in place.
+Seven findings below are **live defects that need a fix regardless of this plan** and
+are not merely reorganisation work. They are flagged in place.
 
-Three rescues are executed and in review: `curriculums/` (COSYplatform PR #48),
-`activities/`, `data/` and `docs/` (COSYplatform PR #49).
+Four rescues are executed and in review: `curriculums/` (COSYplatform PR #48),
+`activities/`, `data/` and `docs/` (COSYplatform PR #49), and `cefr/`
+(COSYplatform PR #50).
 
 ---
 
@@ -169,18 +170,29 @@ them, so the link is by name only.
 `COSYlanguages`". That is stale — `COSYlanguages` has never contained either directory
 (checked across all history). Resolve the intended owner before moving.
 
-### 1.5 `cefr/` — 17 unique · **MOVE (needs reconciliation)**
+### 1.5 `cefr/` — 17 unique · **MOVED (done — PR #50)**
 
 The canonical CEFR master: `CEFR_Universal_Master.md`, `CHANGELOG.md`, `README.md`,
 eight data files (`abilities`, `descriptors`, `functions`, `levels`, `meta`, `scales`,
-`themes`, `toolkit`) and five schemas.
+`themes`, `toolkit`), five schemas, and `docs/repo-comparison-2026-09-30.md`.
 
-None of these eight data files match any file in `COSYdata` by content hash (0 of 8).
-Three names do exist in `COSYdata` with different content — `levels.json` in
-`taxonomy/`, `themes.json` in `schemas/` and `taxonomy/`, `descriptors.json` under
-`vocabulary/{lang}/b2/` — so a naive name-based merge would collide. `COSYdata` holds a
-*draft* unified reference; this is the master. Class (a). `COSYdata` is the owner, and
-the name collisions need reconciling rather than overwriting.
+`COSYdata` was the first guess, because it holds the ecosystem's taxonomy. The
+directory's own README settles it against that guess:
+
+> **COSYplatform/cefr is the canonical source for the CEFR reference.** Other
+> repositories must treat copies as read-only mirrors and propose changes by Issue/PR
+> here.
+
+`COSYplatform` is the owner, and the directory is missing there — the same gap as
+`curriculums/`. The build and validate tooling (`build-cefr-json.py`, `validate-cefr.js`)
+is wired into the source repository's `validate` chain (`check:cefr`). Restored as
+COSYplatform PR #50, verified by `build-cefr-json.py --check` (data already current)
+and `validate-cefr.js` (all schemas and relational checks pass).
+
+The three name collisions with `COSYdata` (`levels.json` in `taxonomy/`, `themes.json`
+in `schemas/` and `taxonomy/`, `descriptors.json` under `vocabulary/{lang}/b2/`) are
+between genuinely different files, so restoring to `COSYplatform` avoids the merge
+hazard entirely.
 
 ### 1.6 `scripts/` — 35 unique · **SPLIT**
 
@@ -235,7 +247,7 @@ migration-history record if wanted.
 
 | Path | Unique | Class | Note |
 |---|---|---|---|
-| `templates/` | 6 | (a) | `curriculum-template.html`, `unit-template.html`, `communication/{index,unit}-template.html`, `grammar/{lesson,roadmap}-template.html` — no target copy; the two that overlap by name with `COSYmanuals` are different files |
+| `templates/` | 6 | (b) | **Superseded, not orphan.** All six (`curriculum-template.html`, `unit-template.html`, `communication/{index,unit}-template.html`, `grammar/{lesson,roadmap}-template.html`) reference the dead pinned SHA `f59a291e`; `COSYmanuals/templates/` holds a same-named copy of each, newer, using the local split `tokens.css`/`base.css`/`components.css`/`layout.css` styles. Drop. |
 | `roadmaps/` | 4 | (b) | **Superseded, not orphan.** `discussion-en-{a2,b1,b2,c1}.json` are empty stubs (`totalLessons` 0, 0, 0, 1); `COSYplatform` already holds the same four with 8, 28, 15 and 7 lessons, and the one source lesson id appears there. Drop. |
 | `activities/` | 3 | (a) | `games.json`, `print.json`, `tools.json` — **moved (PR #49)** |
 | `data/` | 2 | (a) | `conversion-map.json`, `platform-stats.json` — **moved (PR #49)** |
@@ -395,6 +407,10 @@ These are not reorganisation work. They are broken today.
    directory has ever existed there, so this blocks the `reference/` rescue (§1.4) and
    should be corrected.
 
+7. **A second directory missing from `COSYplatform`.** `cefr/` declares itself canonical
+   for `COSYplatform` but is absent here, the same gap as `curriculums/`. Its build and
+   validate scripts are missing too. Restored by PR #50.
+
 ---
 
 ## 4. Recommended order for Phase 1 step 2
@@ -403,8 +419,7 @@ These are not reorganisation work. They are broken today.
    from one root cause. **Done, in review as PR #48.**
 2. **Rescue the platform's own content** — `activities/`, `data/`, `docs/` (§1.7, §1.10).
    **Done, in review as PR #49.**
-3. **Rescue the remaining small authored sets** — `templates/` (§1.10), then `cefr/`
-   (§1.5) once its three name collisions are reconciled.
+3. **Restore `cefr/` into `COSYplatform`** (§1.5). **Done, in review as PR #50.**
 4. **Decide the owner of `reference/`** (§1.4) — the 53 English lesson plans, blocked
    by the stale `COSYmanuals/docs/MANUALS_MIGRATION_STATUS.md` claim.
 5. **Rescue the 153 authored lessons** (§1.2) — needs a decision on the owning repo.
@@ -412,8 +427,13 @@ These are not reorganisation work. They are broken today.
 7. **Rescue the blog** (§2.4) — needs an owner decision.
 8. **Rescue strategic docs** (§2.6) and the remaining small groups.
 9. **Drop** the regenerable sets (`drafts/`, derived lessons, superseded i18n and
-   Supabase schema, the stub roadmaps and the older teacher-guides) and the junk
-   (`__pycache__`, old tests, planning notes).
+   Supabase schema, the stub roadmaps, the older teacher-guides and templates) and the
+   junk (`__pycache__`, old tests, planning notes).
 
 Steps 4, 5 and 7 need a decision before they can be executed. Everything else is
 mechanical once the target repository is agreed.
+
+`scripts/` (§1.6) is not a standalone step: the CEFR pair is restored with `cefr/`
+(PR #50), and the remaining build/validate scripts move with the content they build —
+`build_all_modules.py` with the curriculum, `validate-curriculums.js` with the
+curriculum, and so on. They should not move ahead of their content.
