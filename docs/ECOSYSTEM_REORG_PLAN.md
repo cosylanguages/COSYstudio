@@ -1,15 +1,20 @@
 # COSY Ecosystem Reorganisation Plan
 
-Status: **proposal — approved; Phase 1 rescue audit executed, curriculum rescue in review.**
+Status: **proposal — approved; Phase 1 rescues executed and merged.**
 Owner: founder.
 Last surveyed: 2026-11-17 (all 13 repositories under `cosylanguages/`, read-only).
+Last updated: 2026-11-17 (Phase 1 rescues merged).
 
-Three changes outside this document have been made, all scoped to Phase 1:
+Seven changes outside this document have been made, all scoped to Phase 1:
 
 - The `COSYlanguagesss` vocabulary import into `COSYdata` is done (section 8.4).
 - The files damaged by the lossy rescue in `COSYmanuals` have been repaired (section 8.3).
-- The orphan classification is written (`docs/ORPHAN_CLASSIFICATION.md`), and its first
-  action — restoring `curriculums/` to `COSYplatform` — is in review (section 8.5).
+- The orphan classification is written (`docs/ORPHAN_CLASSIFICATION.md`).
+- The canonical `curriculums/` tree is restored to `COSYplatform` (section 8.5).
+- The grammar reference and its schemas are restored to `COSYplatform` (section 8.6).
+- The 153 authored lessons are restored to `COSYplatform`, sanitized (section 8.6).
+- The scene art is rescued into `COSYgames`, and the legacy blog into `COSYmagazine`
+  (section 8.6).
 
 Everything else below is a proposal. No studio, schema, or site has been moved or
 deleted.
@@ -336,6 +341,10 @@ Impact today is limited, because every affected file sits in a legacy repository
 (`COSYmanuals` bootcamp pages). But it is the exact failure mode the pinned-URL
 pattern is supposed to avoid, and it is live in the plan's own recommended mechanism.
 
+The comment-only references have since been removed (COSYmanuals PR #110); the
+`COSYmanuals` bootcamp pages use relative imports that all resolve. The remaining dead
+imports are the real ones in the legacy repositories, which Phase 1 disposes of.
+
 The lesson is that a pinned SHA must be verified at the moment it is written and
 checked by CI thereafter. Phase 5 should include a check that every pinned URL
 resolves.
@@ -496,7 +505,7 @@ This clears the item that blocked deleting `COSYlanguagesss`.
 
 ---
 
-### 8.5 The curriculum risk — in review
+### 8.5 The curriculum risk — resolved
 
 The orphan classification (`docs/ORPHAN_CLASSIFICATION.md`) found that
 `COSYplatform` had no `curriculums/` directory, so the path its own migration map and
@@ -518,16 +527,74 @@ opens with `-- Upstream Canonical Curriculum Owner: COSYplatform`; and the consu
 code fetches from `COSYplatform`. `COSYmanuals/CANON_SOURCE_OF_TRUTH.md` names
 `COSYlanguages`, which has no such directory — a stale claim to correct.
 
-**The restore is in review as COSYplatform PR #48.** It adds the tree at the path the
+**The restore was merged as COSYplatform PR #48.** It adds the tree at the path the
 migration map records, and repins five `A1.html` files that referenced a deleted
 COSYlanguages commit (`f59a291e`, 404) to `273b517`, with `cosy-tokens.css` moved to
 `css/tokens.css`. Verified: 144/144 JSON parse, 118/118 non-archive files carry the
 schema's required fields, 83/83 COSYmanuals stub paths resolve, both repinned URLs
 return 200, and all three CI checks pass.
 
-Pages serves `COSYplatform` from `main`, so merging PR #48 fixes the gateway fetch and
-the 83 stub targets at once. Replacing the stubs with the real files in `COSYmanuals` is
-then a separate, smaller change.
+Pages serves `COSYplatform` from `main`, so merging PR #48 fixed the gateway fetch and
+the 83 stub targets at once. `COSYplatform/main/curriculums/` now holds 172 files, the
+gateway fetch returns 200, and 83/83 `COSYmanuals` stubs resolve. Replacing the stubs
+with the real files in `COSYmanuals` remains a separate, smaller change.
+
+---
+
+### 8.6 The remaining Phase 1 rescues — merged
+
+Four further rescues were executed and merged. Each is scoped, verified and reversible.
+
+**The grammar reference and its schemas → `COSYplatform` (PR #51).** The `reference/`
+tree and the two safe schemas (`lesson-stage.schema.json`, `ccq.schema.json`) were
+restored to the repository that consumes them: `COSYpractice/types/concept-check/concept-check.js`
+fetches them. `schemas/lesson.schema.json` was deliberately withheld — it declares
+`teacherNotes` and `answers`, so committing it trips the repository's own
+`check_protected_keys.js`. The guard now passes.
+
+**The 153 authored lessons → `COSYplatform`, sanitized (PR #52).** The lesson bodies
+lived only in `COSYplatform-source`. All 153 carried teacher notes and answer keys
+(`teacherNotes`/`answers` properties in 148 JSON, `<cosy-teacher-notes>` in the 5 XML),
+so committing them raw would fail `check_protected_keys.js` and break the
+`PROTECTED_CONTENT_CONTRACT.md` rule that bodies come from git-ignored folders and are
+seeded into Supabase. They were run through the repository's own
+`scripts/sanitize-student-lesson.js` — the same sanitizer that produced the committed
+`science-en` set — which strips the protected halves and keeps titles, slides, stages,
+durations, modes, elements and XML structure. The protected halves stay in
+`COSYplatform-source` / Supabase. Result: 42 roadmap `lessonFile` references and the
+`classroom.html` `general-english-a1/daily-routine.json` option resolve, where all 43
+were 404 before; the guard passes.
+
+Not included: the 451 `spoken-en/*.xml` files derived from COSYevents sessions, and the
+3 derived files `classroom.html` still references (`discussion-en/4-day-work-week.xml`,
+`spoken-en/4-day-work-week.xml`, `spoken-en/how-to-love-your-work.xml`). These are
+generated from `COSYevents/sessions/*` by `scripts/convert-session-to-lesson.py`, so
+they are rebuilt rather than copied; their sources are intact. Regenerating them is a
+separate change.
+
+**The scene art → `COSYgames` (PR #108).** 13 scene backgrounds from
+`COSYlanguagesss/images/scenes` were restored to `COSYgames/images/scenes`.
+`COSYgames` owns `scene-match/tools/hotspot-editor.html`, which expects
+`images/scenes/{id}.png`; the repository had no `images/scenes` at all, because its
+scenes use inline `svgBackground`.
+
+**The legacy blog → `COSYmagazine` (PR #92).** The legacy blog lived in
+`COSYlanguagesss/blog` (43 posts). `COSYmagazine` is its successor and already holds the
+same publishing pipeline (`build-blog.js`, `generate-blog-art.js`,
+`validate-blog-schema.js`), so 27 of the 43 slugs were already published. The remaining
+16 were adopted: 13 `top-100-a0-a1` vocabulary master lists, `welcome-to-cosy-blog`, and
+`building-cosy-master-curriculum` (marked `draft` in the source, so the build holds it
+back). Verified: the schema validator passes, the full build succeeds (97 → 112
+published posts, 100 → 115 sitemap URLs, zero URLs dropped), and the only test change is
+the August-issue article count, which moves 17 → 32 because every addition carries the
+legacy `Vol. 2026.08` tag and August is the foundations issue. The remaining issues are
+unchanged.
+
+A follow-up also removed a stale commit-pin comment from six `COSYmanuals` bootcamp
+pages (PR #110). Nothing was actually pinned there — the files use relative imports, and
+all 102 references resolve — but the comment pointed at `f59a291e`, which returns 404.
+The `COSYplatform` `A1.html` files carry a similar comment, but theirs points at
+`273b517`, which resolves and is genuinely imported, so those were left alone.
 
 ---
 
