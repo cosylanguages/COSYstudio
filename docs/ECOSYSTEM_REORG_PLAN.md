@@ -1,13 +1,15 @@
 # COSY Ecosystem Reorganisation Plan
 
-Status: **proposal — approved; Phase 1 rescue audit executed.**
+Status: **proposal — approved; Phase 1 rescue audit executed, curriculum rescue in review.**
 Owner: founder.
 Last surveyed: 2026-11-17 (all 13 repositories under `cosylanguages/`, read-only).
 
-Two changes outside this document have been made, both scoped to Phase 1:
+Three changes outside this document have been made, all scoped to Phase 1:
 
 - The `COSYlanguagesss` vocabulary import into `COSYdata` is done (section 8.4).
 - The files damaged by the lossy rescue in `COSYmanuals` have been repaired (section 8.3).
+- The orphan classification is written (`docs/ORPHAN_CLASSIFICATION.md`), and its first
+  action — restoring `curriculums/` to `COSYplatform` — is in review (section 8.5).
 
 Everything else below is a proposal. No studio, schema, or site has been moved or
 deleted.
@@ -491,6 +493,41 @@ Verified: `npm run validate` passes with 0 schema errors and 0 added warnings,
 missing. Merged as COSYdata PR #231.
 
 This clears the item that blocked deleting `COSYlanguagesss`.
+
+---
+
+### 8.5 The curriculum risk — in review
+
+The orphan classification (`docs/ORPHAN_CLASSIFICATION.md`) found that
+`COSYplatform` had no `curriculums/` directory, so the path its own migration map and
+Supabase schema designate as canonical returned 404. Three live breakages shared that
+root cause:
+
+- The gateway could not load course-preview curriculum data. `COSYlanguages/js/core/engine.js`
+  (`loadCurriculum()`) fetches
+  `raw.githubusercontent.com/cosylanguages/COSYplatform/main/curriculums/...`, which 404s.
+- 83 curriculum files in `COSYmanuals` were stubs pointing at the same dead path
+  (`{"source": ".../COSYplatform/curriculums/...", "note": "canonical data lives in COSYplatform"}`).
+- The only copy of the data (144 JSON, 14 languages, 5.8 MB) was in `COSYplatform-source`,
+  scheduled for deletion.
+
+**Ownership was contested and is now resolved in favour of `COSYplatform`.**
+`COSYplatform-source/docs/MIGRATION_MAP.md` records the migration from `COSYmanuals` to
+`COSYplatform` for exactly this tree; `COSYplatform/supabase/migrations/20261030000000_protected_content_schema.sql`
+opens with `-- Upstream Canonical Curriculum Owner: COSYplatform`; and the consuming
+code fetches from `COSYplatform`. `COSYmanuals/CANON_SOURCE_OF_TRUTH.md` names
+`COSYlanguages`, which has no such directory — a stale claim to correct.
+
+**The restore is in review as COSYplatform PR #48.** It adds the tree at the path the
+migration map records, and repins five `A1.html` files that referenced a deleted
+COSYlanguages commit (`f59a291e`, 404) to `273b517`, with `cosy-tokens.css` moved to
+`css/tokens.css`. Verified: 144/144 JSON parse, 118/118 non-archive files carry the
+schema's required fields, 83/83 COSYmanuals stub paths resolve, both repinned URLs
+return 200, and all three CI checks pass.
+
+Pages serves `COSYplatform` from `main`, so merging PR #48 fixes the gateway fetch and
+the 83 stub targets at once. Replacing the stubs with the real files in `COSYmanuals` is
+then a separate, smaller change.
 
 ---
 
