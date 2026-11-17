@@ -5,7 +5,7 @@ Owner: founder.
 Last surveyed: 2026-11-17 (all 13 repositories under `cosylanguages/`, read-only).
 Last updated: 2026-11-17 (Phase 1 rescues merged).
 
-Seven changes outside this document have been made, all scoped to Phase 1:
+Eight changes outside this document have been made, all scoped to Phase 1:
 
 - The `COSYlanguagesss` vocabulary import into `COSYdata` is done (section 8.4).
 - The files damaged by the lossy rescue in `COSYmanuals` have been repaired (section 8.3).
@@ -13,6 +13,8 @@ Seven changes outside this document have been made, all scoped to Phase 1:
 - The canonical `curriculums/` tree is restored to `COSYplatform` (section 8.5).
 - The grammar reference and its schemas are restored to `COSYplatform` (section 8.6).
 - The 153 authored lessons are restored to `COSYplatform`, sanitized (section 8.6).
+- The three derived lessons `classroom.html` pointed at are restored, sanitized, so all
+  nine classroom lesson options resolve (section 8.6).
 - The scene art is rescued into `COSYgames`, and the legacy blog into `COSYmagazine`
   (section 8.6).
 
@@ -565,12 +567,21 @@ durations, modes, elements and XML structure. The protected halves stay in
 `classroom.html` `general-english-a1/daily-routine.json` option resolve, where all 43
 were 404 before; the guard passes.
 
-Not included: the 451 `spoken-en/*.xml` files derived from COSYevents sessions, and the
-3 derived files `classroom.html` still references (`discussion-en/4-day-work-week.xml`,
-`spoken-en/4-day-work-week.xml`, `spoken-en/how-to-love-your-work.xml`). These are
-generated from `COSYevents/sessions/*` by `scripts/convert-session-to-lesson.py`, so
-they are rebuilt rather than copied; their sources are intact. Regenerating them is a
-separate change.
+The three derived files `classroom.html` referenced
+(`discussion-en/4-day-work-week.xml`, `spoken-en/4-day-work-week.xml`,
+`spoken-en/how-to-love-your-work.xml`) were restored in a follow-up (PR #53). All nine
+`classroom.html` lesson options now resolve, up from six.
+
+**Regeneration is not reproducible, which changes how these should be treated.** The 451
+`spoken-en/*.xml` files carry a provenance header pointing at a COSYevents session, and
+`scripts/convert-session-to-lesson.py` can rebuild them, so the plan first recorded them
+as "regenerable". Re-running the converter on the three above does **not** reproduce the
+stored files: the COSYevents sources have moved on, so the output differs in slide count,
+stage names, duration and vocabulary markup, and the converter also writes to
+`roadmaps/*.json` as a side effect. The artifacts were therefore rescued and sanitized
+rather than regenerated, to avoid a silent content change to live lessons. Regenerating
+the whole `spoken-en` set from current sources is a separate, deliberate task, and until
+it is done those 448 files remain derived-but-unreproducible, not safely regenerable.
 
 **The scene art → `COSYgames` (PR #108).** 13 scene backgrounds from
 `COSYlanguagesss/images/scenes` were restored to `COSYgames/images/scenes`.
