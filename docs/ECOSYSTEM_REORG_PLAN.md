@@ -213,14 +213,19 @@ Each repository gets the same treatment.
 
 1. **Classify the orphans.** Split them into (a) content that should move, (b)
    generated output that can be regenerated, and (c) genuine junk. Only (a) is work.
-2. **Re-home the keepers.** Move each into the repository that owns that content now,
-   as its own reviewed change. `COSYmanuals/docs/from-cosylanguages/` is the precedent:
-   strategic documents were already rescued there.
-3. **Archive, then delete.** Archive first so the repository becomes read-only and its
+   The `project/docs/` pass is done and is recorded in section 8.3.
+2. **Complete the vocabulary import first.** Roughly 4,400 classified entries exist only
+   in `COSYlanguagesss` and are not yet in `COSYdata` (section 8.4). This is the one
+   step that genuinely blocks deletion, because the destination was already chosen.
+3. **Re-home the keepers.** Move each into the repository that owns that content now,
+   as its own reviewed change. `COSYmanuals/docs/from-cosylanguages/` is the precedent,
+   though section 8.3 shows that rescue was partly lossy and needs re-verification.
+4. **Archive, then delete.** Archive first so the repository becomes read-only and its
    Pages URL keeps resolving; delete only after an agreed period and a link check.
 
-Order: `COSYplatform-source` first (no Pages site, so no live URL to preserve),
-`COSYlanguagesss` second (has a Pages site, so it needs the archive window).
+Order: `COSYplatform-source` first (no Pages site, so no live URL to preserve, and its
+orphans are content rather than data with a chosen destination), `COSYlanguagesss`
+second (it has a Pages site and it holds the vocabulary import blocker).
 
 This is the largest clarity win, but it is **not** the lowest-risk step, because it
 depends on classifying roughly 3,600 files. That classification is the real work of
@@ -268,6 +273,11 @@ security divergence.
 1. **Option A or Option B?** Section 2. Recommendation: A.
 2. **Legacy deletion window**: how long should an archived repository sit read-only
    before it is deleted? Section 5, Phase 1.
+3. **Vocabulary import**: ~4,400 entries classified by COSYdata as `dictionary-word` or
+   `phrase/idiom` exist only in `COSYlanguagesss` and were never imported. Complete the
+   import, or accept the loss? Section 8.4. This blocks deleting `COSYlanguagesss`.
+4. **The 32 audit reports** in `COSYlanguagesss/project/docs/audits/`: archive them, or
+   delete them? Section 8.3.
 
 Resolved:
 - `COSYlanguagesss` and `COSYplatform-source` are the old `COSYlanguages` and
@@ -367,6 +377,68 @@ Two of these need a decision rather than a move:
 
 The sweep is reproducible: index each repository by content hash, then compare the
 legacy set against the union of its targets.
+
+### 8.3 Classification pass: `project/docs/` (57 files)
+
+The 57 documents in `COSYlanguagesss/project/docs/` were classified by reading each
+one and checking whether its subject already has an owner.
+
+| Class | Count | Action |
+|---|---|---|
+| Already rescued | 7 | None — byte-identical copies already exist in `COSYmanuals/docs/from-cosylanguages/` |
+| Unique, valuable | 13 | Re-home to the owning repository |
+| Audit reports | 32 | Archive under `COSYdata/reports/archive/`, or delete |
+| Superseded | 2 | Delete |
+| Mangled during rescue | 1 | Re-copy from the original |
+
+**Unique, valuable (13) — re-home these:**
+
+| Document | Owning repository |
+|---|---|
+| `THEMES.md` | COSYdata (it already holds `theme-domain-regional-audit`) |
+| `SCHEMA.md` | COSYdata (word ID format) |
+| `UNIFIED_VOCABULARY_TAXONOMY_AND_SCENE_MATCH_MATRIX.md` | COSYdata |
+| `CONTENT_ARCHITECTURE.md` | COSYlanguages (current copy differs from the legacy one) |
+| `LANGUAGES.md` | COSYlanguages (language registry) |
+| `ROADMAP.md` | COSYlanguages (consolidated master roadmap) |
+| `MULTI_REPO_MIGRATION_ARCHITECTURE.md` | COSYstudio (ecosystem architecture) |
+| `DEEP_REPOSITORIES_COMPARISON_AND_MIGRATION_MANIFEST.md` | COSYstudio |
+| `REPOSITORIES_DECOUPLING_AND_DATA_SYNC_GUIDELINES.md` | COSYstudio |
+| `PRACTICE_UX_UI_DESIGN.md` | COSYpractice |
+| `B1_PLUS_CURRICULUM_POLICY_AND_READINESS.md` | COSYmanuals |
+| `COSYMANUALS_PRACTICE_BUTTONS_SPECIFICATION.md` | COSYmanuals (the rescued copy is mangled — see below) |
+| `SCENE_MATCH_A0_A1_OPEN_WORLD_AND_IMAGE_PROMPTS.md` | COSYgames (owns `scene-match/`) |
+
+**The rescue was partly lossy.** Of the files already copied to
+`COSYmanuals/docs/from-cosylanguages/`, one is corrupt:
+`COSYMANUALS_PRACTICE_BUTTONS_SPECIFICATION.md` was copied with all whitespace
+stripped, so it is a single 2,194-byte line, and its URLs lost their slashes
+(`https:cosylanguages.github.ioCOSYlanguagespractice`). The original 86-line version
+in `COSYlanguagesss` is intact. The rescue needs a re-copy, and the other rescued files
+should be diffed too, since this shows the copy step was not reliable.
+
+### 8.4 The vocabulary risk (needs a decision)
+
+`COSYlanguagesss/vocabulary/` is not redundant. `COSYdata` already ran a classification
+of this content (`COSYdata/reports/LEGACY_CLASSIFICATION.md` and
+`COSYLANGUAGES_ONLY_ENTRIES.csv`, 6,229 entries classified as `dictionary-word` or
+`phrase/idiom`), which is strong evidence that COSYdata is the intended owner.
+
+But the classification was not fully executed. Sampling 300 of the 6,229 classified
+entries and searching `COSYdata/vocabulary/`:
+
+| Result | Sampled | Estimated overall |
+|---|---|---|
+| Present in COSYdata | 89 | ~1,850 |
+| **Not in COSYdata, but present in `COSYlanguagesss`** | **211** | **~4,380** |
+| In neither | 0 | 0 |
+
+So roughly **4,400 classified entries exist only in `COSYlanguagesss`**. Deleting that
+repository without first importing them would lose vocabulary that someone already
+decided should be in COSYdata.
+
+This is the single most important item blocking Phase 1. The action is to complete the
+import that `LEGACY_CLASSIFICATION.md` describes, then delete.
 
 ---
 
