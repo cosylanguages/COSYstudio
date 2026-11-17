@@ -36,9 +36,10 @@ not merely reorganisation work. They are flagged in place.
 1,637 unique files. Concentrated in `drafts/` (686), `lessons/` (604),
 `curriculums/` (147), `reference/` (56).
 
-### 1.1 `curriculums/` — 147 unique · **MOVE (urgent)**
+### 1.1 `curriculums/` — 147 unique · **MOVE (urgent) — to `COSYplatform`**
 
-**This is the most important finding in the pass.**
+**This is the most important finding in the pass, and it corrects the assumption in
+the plan that `COSYmanuals` is the destination.**
 
 `COSYmanuals/curriculums/` contains 96 JSON files, of which **83 are stubs** of this
 form:
@@ -50,23 +51,49 @@ form:
 }
 ```
 
-That URL **returns 404** — `COSYplatform` has no `curriculums/` directory at all. The
-stub asserts that `COSYplatform` is the canonical owner, but the only copy of the data
-is in `COSYplatform-source`. So:
+That URL **returns 404** — `COSYplatform` has never contained a `curriculums/`
+directory (verified across all branches). The stub asserts `COSYplatform` is the
+canonical owner; the only copy of the data is in `COSYplatform-source`. All 83 stub
+paths exist there, so nothing is lost yet.
 
-- The canonical curriculum data (5.8 MB, 144 JSON files, 14 languages) exists **only**
-  in the repository scheduled for deletion.
-- `COSYmanuals` currently serves 83 broken pointers to it.
+**The owner is `COSYplatform`, not `COSYmanuals`.** Three independent documents say so:
 
-Re-home the real files into `COSYmanuals/curriculums/`, replacing the stubs. Note that
-97 of the unique files share a path with an existing `COSYmanuals` stub, so this is a
-straight overwrite of stub → data, not a new tree.
+- `COSYplatform-source/docs/MIGRATION_MAP.md` records the migration **from
+  `COSYmanuals` to `COSYplatform`** for exactly this tree
+  (`curriculums/{iso}/{course_type}/{LEVEL}.json` → same path), with the legacy
+  `curriculums/{english,french,italian,russian,greek}/` folders "skipped pending
+  reconciliation".
+- `COSYplatform/supabase/migrations/20261030000000_protected_content_schema.sql` opens
+  with `-- Upstream Canonical Curriculum Owner: COSYplatform`.
+- `COSYmanuals/README.md` calls `COSYplatform` the "canonical curriculum authority" and
+  declares its own curriculum files read-only mirrors.
 
-The remaining 50 are unique to the source and have no stub: `en/` (45), `_archive/`
-(25 of which 22 are archive-only), `_schema/` (1), and per-language `C1` files.
+**This is a second live breakage, not just a preservation problem.** The live gateway
+fetches the same dead path at runtime:
 
-This item should be done **before** anything else in Phase 1, because it fixes a
-currently-broken page as well as preserving the data.
+```js
+// COSYlanguages/js/core/engine.js:1321  — loadCurriculum()
+const standardPath = `https://raw.githubusercontent.com/cosylanguages/COSYplatform/main/curriculums/${lang}/general/${levelUp}.json`;
+```
+
+That URL returns 404, so course-preview curriculum data does not load on the gateway.
+
+**One restore fixes both.** Putting the real files back into
+`COSYplatform/curriculums/` resolves the 83 `COSYmanuals` stub pointers *and* the
+gateway fetch. The 97 unique files that share a path with an existing `COSYmanuals`
+stub are a straight stub → data replacement.
+
+**Ownership is contested and needs a decision.** `COSYmanuals/CANON_SOURCE_OF_TRUTH.md`
+names a third candidate: "`curriculum/en/general/*.json` in **COSYlanguages** is the
+sole writable master copy". `COSYlanguages` has no such directory, so that policy is
+stale — but it is a live written claim. Resolve the owner (recommended:
+`COSYplatform`, per the two documents above) before moving 5.8 MB.
+
+The remaining 50 unique files have no stub: `en/` (45), `_archive/` (25, of which 22
+are archive-only), `_schema/` (1), and per-language `C1` files.
+
+Do this **before** anything else in Phase 1: it fixes two live breakages and preserves
+the only copy of the data.
 
 ### 1.2 `lessons/` — 604 unique · **SPLIT: 451 regenerate, 153 move**
 
@@ -312,19 +339,37 @@ reconcile the drift first; `print-grammar.html` exists only here.
 
 These are not reorganisation work. They are broken today.
 
-1. **83 broken curriculum pointers in `COSYmanuals`.** `COSYmanuals/curriculums/*/*/*.json`
-   are stubs pointing at `https://cosylanguages.github.io/COSYplatform/curriculums/...`,
-   which returns 404. The data exists only in `COSYplatform-source` (§1.1). Fixing this
-   is the single highest-value action in Phase 1.
+1. **The canonical curriculum data is missing from its owner.** `COSYplatform` has no
+   `curriculums/` directory, so the path its own migration map and Supabase schema
+   designate as canonical returns 404. The only copy (5.8 MB, 144 files, 14 languages)
+   is in `COSYplatform-source`, which is scheduled for deletion.
 
-2. **The dead pinned imports** already recorded in plan §8.1 (19 files pinned to
+2. **83 broken curriculum pointers in `COSYmanuals`.** Its curriculum files are stubs
+   aimed at the same 404 (§1.1).
+
+3. **The live gateway cannot load curriculum data.** `COSYlanguages/js/core/engine.js`
+   fetches `raw.githubusercontent.com/cosylanguages/COSYplatform/main/curriculums/…`,
+   which returns 404, so course-preview curriculum data fails to load.
+
+   Defects 1–3 are one root cause and one fix: restore the tree into `COSYplatform`.
+   That is the single highest-value action in Phase 1.
+
+4. **The dead pinned imports** already recorded in plan §8.1 (19 files pinned to
    `f59a291e…`, 2 to `ba14a13d…`, 1 placeholder SHA). Confirmed still present.
+
+5. **Three documents disagree on curriculum ownership.**
+   `COSYplatform-source/docs/MIGRATION_MAP.md` and the `COSYplatform` Supabase schema
+   say `COSYplatform`; `COSYmanuals/CANON_SOURCE_OF_TRUTH.md` says `COSYlanguages`
+   (which has no such directory, so the claim is stale). Two say `COSYplatform`, and
+   the code that consumes the data fetches from `COSYplatform`, so `COSYplatform` is
+   the owner. The stale document should be corrected.
 
 ---
 
 ## 4. Recommended order for Phase 1 step 2
 
-1. **Rescue `curriculums/`** (§1.1) — fixes a live breakage; do it first.
+1. **Restore `curriculums/` into `COSYplatform`** (§1.1) — fixes three live breakages
+   from one root cause; do it first.
 2. **Rescue the small authored sets** — `reference/`, `cefr/`, `docs/`, `templates/`,
    `roadmaps/`, `activities/`, `teacher-guides/`, `data/` (§1.4–1.10).
 3. **Rescue the 153 authored lessons** (§1.2) — needs a decision on the owning repo.
@@ -334,5 +379,6 @@ These are not reorganisation work. They are broken today.
 7. **Drop** the regenerable sets (`drafts/`, derived lessons, superseded i18n and
    Supabase schema) and the junk (`__pycache__`, old tests, planning notes).
 
-Steps 3 and 5 are the two that need a decision before they can be executed. Everything
-else is mechanical once the target repository is agreed.
+Steps 1, 3 and 5 need a decision before they can be executed (ownership for step 1,
+owning repository for step 3, adopt-or-retire for step 5). Everything else is
+mechanical once the target repository is agreed.
