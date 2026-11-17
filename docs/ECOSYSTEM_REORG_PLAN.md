@@ -201,41 +201,40 @@ carry no functional risk.
   boundary is written down before anything moves.
 
 ### Phase 1 — Delete the legacy repositories
-Both legacy repositories are already decided for deletion. They are still not safe
-to delete blind, because each is a superset snapshot that may hold content which
-exists nowhere else. Each gets the same three-step treatment, in this order.
+Both legacy repositories are decided for deletion. They are **not** duplicates of their
+replacements, so deleting them blind would lose content. An orphan sweep was run and
+the results are in section 8.2.
 
-1. **Sweep for orphans.** Diff each legacy repository against its replacement and
-   collect every file that exists only in the legacy copy. Known candidates:
-   `COSYlanguagesss/print-studio/print-grammar.html` (absent from
-   `COSYlanguages/print-studio/`), and the `apps/` and `project/` trees.
-2. **Re-home the survivors.** Move each orphan into the repository that owns that
-   content now, as its own reviewed change. If a file has no owner, leave it out and
-   record the decision rather than guessing.
-3. **Archive, then delete.** Archive first so the repository becomes read-only and
-   its Pages URL keeps resolving; delete only after the archived state has sat
-   unchanged for an agreed period and a link check passes.
+The finding: of 1,747 files in `COSYplatform-source`, 1,638 exist nowhere else in the
+target repositories. Of 2,460 files in `COSYlanguagesss`, 1,978 exist nowhere else.
+These are not stray copies; they are content with no current home.
+
+Each repository gets the same treatment.
+
+1. **Classify the orphans.** Split them into (a) content that should move, (b)
+   generated output that can be regenerated, and (c) genuine junk. Only (a) is work.
+2. **Re-home the keepers.** Move each into the repository that owns that content now,
+   as its own reviewed change. `COSYmanuals/docs/from-cosylanguages/` is the precedent:
+   strategic documents were already rescued there.
+3. **Archive, then delete.** Archive first so the repository becomes read-only and its
+   Pages URL keeps resolving; delete only after an agreed period and a link check.
 
 Order: `COSYplatform-source` first (no Pages site, so no live URL to preserve),
 `COSYlanguagesss` second (has a Pages site, so it needs the archive window).
 
-This is the largest clarity win for the least risk, and it unblocks everything after
-it: while these two exist, every duplicate scan has to reason about whether a file is
-live, legacy, or a fork of a third repository.
+This is the largest clarity win, but it is **not** the lowest-risk step, because it
+depends on classifying roughly 3,600 files. That classification is the real work of
+this phase.
 
 ### Phase 2 — Make the shared layer real
-Split along the visibility boundary from section 4.
-
-**Private half, in `COSYstudio`:**
 - Move `studio-core.js` into `COSYstudio/packages/studio-core`, with the existing
   tests from `COSYmagazine/tests/test_studio_core.mjs`.
 - Keep the ULO and block schemas beside it.
-
-**Public half, in `COSYlanguages`:**
-- Make the design tokens and shared CSS the single public source, imported by pinned
-  commit SHA (the pattern `COSYplatform-source` attempted, now dead — see section 8.1).
+- Leave the public shared assets (design tokens, base CSS) in `COSYlanguages`, which is
+  public and already serves them. They cannot move to a private `COSYstudio`, because
+  public pages load them.
 - Add a CI check that every pinned URL resolves, so a dead pin cannot be committed
-  again.
+  again (see section 8.1).
 
 ### Phase 3 — Consolidate the studios
 Move the studios into `COSYstudio/studios/<name>/` behind one entry page. Order,
@@ -295,7 +294,7 @@ Resolved:
 
 | Risk | Mitigation |
 |---|---|
-| Pinned-URL imports break if a tag is force-moved | Import by immutable commit SHA, never a branch. See the live example in section 5, Phase 1 |
+| Pinned-URL imports break if the commit is gone | Import by immutable commit SHA and check it resolves in CI. See section 8.1 |
 | A private repo is imported by a public page | Keep the public assets (tokens, base CSS) in `COSYlanguages`; never import those from `COSYstudio` if it is private |
 | Archiving a repository breaks inbound links | Diff and grep for inbound links first; archive (not delete) so URLs keep resolving |
 | The six CMS editors have real behavioural differences | Reconcile into one contract and port the strictest checks before replacing |
@@ -325,6 +324,49 @@ harmless for the studios, because they are gated by Supabase rather than by repo
 visibility. It is worth confirming it is intended, since the repository is described as
 founder-only. Making it private is safe as long as the public shared assets (tokens and
 base CSS) live in `COSYlanguages`, per section 4.1.
+
+### 8.2 Orphan sweep results (Phase 1 input)
+
+Each legacy repository was compared to its replacement set by content hash. "Truly
+unique" means the file's content appears nowhere in the target repositories, under any
+path or name.
+
+**`COSYplatform-source` (1,747 files) vs `COSYplatform` + `COSYmanuals`:**
+
+| Class | Files |
+|---|---|
+| Content exists elsewhere (moved or renamed) | 109 |
+| **Content exists nowhere else** | **1,638** |
+
+Unique content is concentrated in `drafts/` (686), `lessons/` (604), `curriculums/`
+(147) and `reference/` (56).
+
+The `lessons/` case is concrete. `COSYplatform-source/lessons/` holds 604 files;
+`COSYplatform/lessons/` holds 62. **They share zero filenames** — the 604 are not
+copies, they are a separate body of lesson material, mostly XML and JSON lessons for
+English and Russian. They also carry a provenance trail: each XML header names its
+origin, for example `source: .../COSYevents/main/sessions/debatable-relatable/4-day-work-week.html`.
+
+**`COSYlanguagesss` (2,460 files) vs the other seven repositories:**
+
+| Class | Files |
+|---|---|
+| Content exists elsewhere | 482 |
+| **Content exists nowhere else** | **1,978** |
+
+Unique content is concentrated in `vocabulary/` (690), `images/` (424), `project/`
+(343) and `blog/` (148).
+
+Two of these need a decision rather than a move:
+
+- `vocabulary/` (690 files) overlaps `COSYdata/vocabulary/` (1,750 files), which
+  suggests COSYdata already owns this data and the legacy copy is an earlier state.
+- `project/docs/` (57 files) holds strategic documents, several of which were already
+  rescued into `COSYmanuals/docs/from-cosylanguages/`. The rest are candidates for the
+  same treatment.
+
+The sweep is reproducible: index each repository by content hash, then compare the
+legacy set against the union of its targets.
 
 ---
 
