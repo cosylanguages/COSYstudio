@@ -126,15 +126,49 @@ here is a risk, not just untidiness.
 
 ## 4. Target architecture (Option A)
 
-| Layer | Repository | Owns |
-|---|---|---|
-| Shared platform | **COSYstudio** | Design tokens and components, shared JSON schemas (ULO, blocks), studio kernel, all authoring studios |
-| Gateway | COSYlanguages | Hub, placement quiz, course catalogue |
-| Products | practice, tools, games, events, magazine, manuals, world, platform | Their own content and engines |
-| Data | COSYdata | Canonical datasets |
+`COSYstudio` is founder-only. That is a hard constraint on the architecture, because a
+private repository cannot serve files to public sites: a browser on a public Pages site
+cannot fetch a `raw.githubusercontent.com` URL from a private repository, and the API
+returns `404` to unauthenticated clients. The shared layer therefore splits in two.
+
+### 4.1 Two shared layers
+
+| Layer | Repository | Visibility | Owns | Consumed by |
+|---|---|---|---|---|
+| Public shared layer | **COSYlanguages** | public | Design tokens, base CSS, shared components, public resolvers | Every public product, by pinned-SHA import |
+| Private shared layer | **COSYstudio** | founder only | Studio applications, ULO and block schemas, studio kernel, content pipeline tooling | The founder, and CI |
+| Gateway | COSYlanguages | public | Hub, placement quiz, course catalogue | End users |
+| Products | practice, tools, games, events, magazine, manuals, world, platform | public | Their own content and engines | End users |
+| Data | COSYdata | public | Canonical datasets | Products |
+
+The rule is simple: **anything a public page loads must live in a public repository.**
+Anything that only the founder runs may live in `COSYstudio`.
+
+### 4.2 What this changes about the studios
+
+Moving the studios into `COSYstudio` also moves them from public Pages sites to a
+founder-only surface. Today all six studios are reachable from public repositories —
+for example `COSYevents/studio.html` and `COSYevents/shared/js/studio.js` are public
+files. After the move they are not.
+
+That is a change in access model, not just location, so each studio move must also
+decide what the public repository keeps: typically nothing, with the public site
+linking out to nothing and the studio simply being a founder tool.
+
+This does not make studio content secret. The studios already gate on role in the
+browser, and the real gate is database row-level security, as `studio-core.js` states
+in its own header. Founder-only repository access is about who may change the tooling.
+
+### 4.3 Where the shared kernel goes
+
+`studio-core.js` is loaded by studio pages that today sit on public Pages sites. Once
+the studios live in `COSYstudio`, the kernel moves with them and there is no public
+consumer left. So the kernel belongs in the private layer, and the public layer holds
+only what public pages actually load: tokens, base CSS and components.
 
 Every product keeps its own repository, its own Pages site, and its own URL. What
-changes is that the shared layer moves to one place and is consumed, not copied.
+changes is that each shared file has exactly one home, in the layer that matches who
+loads it.
 
 ---
 
@@ -147,6 +181,10 @@ carry no functional risk.
 - Land this document.
 - Add a one-page "where does X live?" decision table to each affected README so the
   boundary is written down before anything moves.
+- **Settle `COSYstudio` visibility first.** It is public with Pages enabled today,
+  which contradicts the founder-only intent (section 8.1). Make the repository private
+  and disable Pages, or record that it is intentionally public. Nothing moves into
+  `COSYstudio` until this is done.
 
 ### Phase 1 — Delete the legacy repositories
 Both legacy repositories are already decided for deletion. They are still not safe
@@ -172,12 +210,18 @@ it: while these two exist, every duplicate scan has to reason about whether a fi
 live, legacy, or a fork of a third repository.
 
 ### Phase 2 — Make the shared layer real
-- Move `studio-core.js` into `COSYstudio/packages/studio-core` as a versioned
-  package, with the existing tests from `COSYmagazine/tests/test_studio_core.mjs`.
-- Move the design tokens into `COSYstudio/packages/tokens`, publish them from a
-  tagged commit, and have products import by pinned URL (the pattern COSYplatform-source
-  already uses).
-- Add the shared JSON schemas (`ulo`, `blocks`) to the same package set.
+Split along the visibility boundary from section 4.
+
+**Private half, in `COSYstudio`:**
+- Move `studio-core.js` into `COSYstudio/packages/studio-core`, with the existing
+  tests from `COSYmagazine/tests/test_studio_core.mjs`.
+- Keep the ULO and block schemas beside it.
+
+**Public half, in `COSYlanguages`:**
+- Make the design tokens and shared CSS the single public source, imported by pinned
+  commit SHA (the pattern `COSYplatform-source` attempted, now dead — see section 8.1).
+- Add a CI check that every pinned URL resolves, so a dead pin cannot be committed
+  again.
 
 ### Phase 3 — Consolidate the studios
 Move the studios into `COSYstudio/studios/<name>/` behind one entry page. Order,
@@ -209,15 +253,19 @@ security divergence.
 ## 6. Open decisions (blocking)
 
 1. **Option A or Option B?** Section 2.
-2. **`COSYstudio` visibility**: it currently has Pages enabled. Should it be a public
-   site or a private/internal tool?
-3. **Ownership**: who reviews and merges changes to the shared layer?
-4. **Legacy deletion window**: how long should an archived repository sit read-only
+2. **Ownership**: who reviews and merges changes to the shared layer?
+3. **Legacy deletion window**: how long should an archived repository sit read-only
    before it is deleted? Section 5, Phase 1.
+4. **Studio visibility after the move**: with `COSYstudio` founder-only, should any
+   studio remain publicly reachable, or do all six become founder tools?
 
-Resolved: `COSYlanguagesss` and `COSYplatform-source` are the old
-`COSYlanguages` and `COSYplatform` respectively, and both are planned for deletion.
-Phase 1 treats them accordingly.
+Resolved:
+- `COSYlanguagesss` and `COSYplatform-source` are the old `COSYlanguages` and
+  `COSYplatform` respectively, and both are planned for deletion. Phase 1 treats them
+  accordingly.
+- `COSYstudio` is founder-only. Section 4 restructures the target architecture around
+  this: the shared layer splits into a public half (in `COSYlanguages`) and a private
+  half (in `COSYstudio`).
 
 ---
 
@@ -234,11 +282,35 @@ Phase 1 treats them accordingly.
 
 | Risk | Mitigation |
 |---|---|
-| Pinned-URL imports break if a tag is force-moved | Import by immutable commit SHA, never a branch |
+| Pinned-URL imports break if a tag is force-moved | Import by immutable commit SHA, never a branch. See the live example in section 5, Phase 1 |
+| A private repo is imported by a public page | Keep public loads in `COSYlanguages`; never import from `COSYstudio` in a public page |
 | Archiving a repository breaks inbound links | Diff and grep for inbound links first; archive (not delete) so URLs keep resolving |
 | The six CMS editors have real behavioural differences | Reconcile into one contract and port the strictest checks before replacing |
 | Moving studios breaks their Supabase coupling | Move Lesson Studio last, after the shared package boundary is proven |
 | Two repositories both claim the same content | Resolve ownership in Phase 1 before any move |
+
+### 8.1 Live findings that need a fix regardless of this plan
+
+**Dead pinned imports.** Nineteen files import from COSYlanguages commit
+`f59a291e8929a116b0c7d96505d67da7c16b287a`, which no longer exists (the API returns
+`422`). Two files also import from `ba14a13d3c32e84f5c8ebbabd2d8b85c060d04a4`, which
+is equally dead. One further file references a placeholder SHA
+(`a1b2c3d4…abcdef…`) that never existed.
+
+Impact today is limited, because every affected file sits in a legacy repository
+(`COSYplatform-source`, `COSYlanguagesss`) or in a comment-only reference
+(`COSYmanuals` bootcamp pages). But it is the exact failure mode the pinned-URL
+pattern is supposed to avoid, and it is live in the plan's own recommended mechanism.
+
+The lesson is that a pinned SHA must be verified at the moment it is written and
+checked by CI thereafter. Phase 5 should include a check that every pinned URL
+resolves.
+
+**`COSYstudio` is public and serving Pages today.** The repository is `public` with
+Pages enabled, and `https://cosylanguages.github.io/COSYstudio/` returns `200`. This
+contradicts the stated founder-only intent, so it needs an explicit fix: make the
+repository private and disable Pages, or confirm it is meant to be public. Nothing in
+this plan should move into `COSYstudio` until that is settled.
 
 ---
 
