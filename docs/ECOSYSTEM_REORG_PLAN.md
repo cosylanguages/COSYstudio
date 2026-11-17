@@ -214,22 +214,22 @@ Each repository gets the same treatment.
 1. **Classify the orphans.** Split them into (a) content that should move, (b)
    generated output that can be regenerated, and (c) genuine junk. Only (a) is work.
    The `project/docs/` pass is done and is recorded in section 8.3.
-2. **Complete the vocabulary import first.** Roughly 4,400 classified entries exist only
-   in `COSYlanguagesss` and are not yet in `COSYdata` (section 8.4). This is the one
-   step that genuinely blocks deletion, because the destination was already chosen.
-3. **Re-home the keepers.** Move each into the repository that owns that content now,
+2. **Re-home the keepers.** Move each into the repository that owns that content now,
    as its own reviewed change. `COSYmanuals/docs/from-cosylanguages/` is the precedent,
    though section 8.3 shows that rescue was partly lossy and needs re-verification.
-4. **Archive, then delete.** Archive first so the repository becomes read-only and its
+3. **Archive, then delete.** Archive first so the repository becomes read-only and its
    Pages URL keeps resolving; delete only after an agreed period and a link check.
 
-Order: `COSYplatform-source` first (no Pages site, so no live URL to preserve, and its
-orphans are content rather than data with a chosen destination), `COSYlanguagesss`
-second (it has a Pages site and it holds the vocabulary import blocker).
+The vocabulary import that previously blocked this phase is done (section 8.4), so
+`COSYlanguagesss` no longer needs to be held back for it. What remains is the
+classification of its non-vocabulary orphans.
+
+Order: `COSYplatform-source` first (no Pages site, so no live URL to preserve), then
+`COSYlanguagesss` (it has a Pages site, so it needs the archive window).
 
 This is the largest clarity win, but it is **not** the lowest-risk step, because it
-depends on classifying roughly 3,600 files. That classification is the real work of
-this phase.
+depends on classifying roughly 3,600 files. One pass (`project/docs/`) is done; the
+rest is the real work of this phase.
 
 ### Phase 2 — Make the shared layer real
 - Move `studio-core.js` into `COSYstudio/packages/studio-core`, with the existing
@@ -273,13 +273,13 @@ security divergence.
 1. **Option A or Option B?** Section 2. Recommendation: A.
 2. **Legacy deletion window**: how long should an archived repository sit read-only
    before it is deleted? Section 5, Phase 1.
-3. **Vocabulary import**: ~4,400 entries classified by COSYdata as `dictionary-word` or
-   `phrase/idiom` exist only in `COSYlanguagesss` and were never imported. Complete the
-   import, or accept the loss? Section 8.4. This blocks deleting `COSYlanguagesss`.
-4. **The 32 audit reports** in `COSYlanguagesss/project/docs/audits/`: archive them, or
+3. **The 32 audit reports** in `COSYlanguagesss/project/docs/audits/`: archive them, or
    delete them? Section 8.3.
 
 Resolved:
+- **Vocabulary import** — done. 5,532 entries that existed only in `COSYlanguagesss` are
+  now in COSYdata, flagged `needs_review`. This cleared the blocker on deleting the
+  legacy repository. Section 8.4.
 - `COSYlanguagesss` and `COSYplatform-source` are the old `COSYlanguages` and
   `COSYplatform` respectively, and both are planned for deletion. Phase 1 treats them
   accordingly.
@@ -417,28 +417,36 @@ stripped, so it is a single 2,194-byte line, and its URLs lost their slashes
 in `COSYlanguagesss` is intact. The rescue needs a re-copy, and the other rescued files
 should be diffed too, since this shows the copy step was not reliable.
 
-### 8.4 The vocabulary risk (needs a decision)
+### 8.4 The vocabulary risk — resolved
 
-`COSYlanguagesss/vocabulary/` is not redundant. `COSYdata` already ran a classification
-of this content (`COSYdata/reports/LEGACY_CLASSIFICATION.md` and
+`COSYlanguagesss/vocabulary/` was not redundant. `COSYdata` had already classified this
+content (`COSYdata/reports/LEGACY_CLASSIFICATION.md` and
 `COSYLANGUAGES_ONLY_ENTRIES.csv`, 6,229 entries classified as `dictionary-word` or
-`phrase/idiom`), which is strong evidence that COSYdata is the intended owner.
+`phrase/idiom`), which showed COSYdata is the intended owner, but the import was never
+completed. `COSYdata/scripts/migrate-cosylanguages-levels.cjs` only merges CEFR level
+metadata for entries that already exist; it never adds missing ones.
 
-But the classification was not fully executed. Sampling 300 of the 6,229 classified
-entries and searching `COSYdata/vocabulary/`:
+Sampling 300 of the 6,229 classified entries and searching `COSYdata/vocabulary/` gave
+211 entries present only in the legacy repository, implying roughly 4,400 in total.
 
-| Result | Sampled | Estimated overall |
-|---|---|---|
-| Present in COSYdata | 89 | ~1,850 |
-| **Not in COSYdata, but present in `COSYlanguagesss`** | **211** | **~4,380** |
-| In neither | 0 | 0 |
+**The import has now been done.** `COSYdata/scripts/import-cosylanguages-vocab.cjs`
+reads the legacy files, matches them against COSYdata by language, word and form, and
+writes the ones with no match. It reported 5,532 missing entries across 14 languages
+and 171 files.
 
-So roughly **4,400 classified entries exist only in `COSYlanguagesss`**. Deleting that
-repository without first importing them would lose vocabulary that someone already
-decided should be in COSYdata.
+Imported entries carry `status: "needs_review"`, the repository's existing mechanism for
+entries awaiting enrichment. That waives the emoji, antonym and transcription
+requirements and marks them for a human pass. `countability` and `plural_form` are
+required without waiver, so nouns take the source value when valid and default to
+`countable` otherwise, also flagged by `needs_review`. Theme and sub-theme are dropped
+unless they exist in `schemas/themes.json`, `domain` is restricted to its permitted set,
+and `gender` is emitted only on nouns.
 
-This is the single most important item blocking Phase 1. The action is to complete the
-import that `LEGACY_CLASSIFICATION.md` describes, then delete.
+Verified: `npm run validate` passes with 0 schema errors and 0 added warnings,
+`npm run build` succeeds and is idempotent, and re-running the importer reports 0
+missing. Merged as COSYdata PR #231.
+
+This clears the item that blocked deleting `COSYlanguagesss`.
 
 ---
 
