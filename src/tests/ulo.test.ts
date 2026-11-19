@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { generateCid, isValidCid, parseCidPrefix } from '../utils/cid';
+import { generateCid, isValidCid, isUloCid, parseCidPrefix } from '../utils/cid';
 import { validateUlo, validateBlock } from '../utils/validate';
 import { transformUlo } from '../utils/transformer';
 import { UniversalLearningObject, LessonBlock } from '../types/ulo';
@@ -14,6 +14,19 @@ describe('COSYstudio ULO Engine Tests', () => {
       const cid = generateCid('ulo');
       assert.strictEqual(isValidCid(cid), true);
       assert.strictEqual(parseCidPrefix(cid), 'ulo');
+    });
+
+    it('should generate unique CIDs', () => {
+      const seen = new Set<string>();
+      for (let i = 0; i < 20000; i++) seen.add(generateCid());
+      assert.strictEqual(seen.size, 20000);
+    });
+
+    it('isUloCid matches the schema rule, isValidCid is generic', () => {
+      assert.strictEqual(isValidCid('cid_template_ab'), true);
+      assert.strictEqual(isUloCid('cid_template_ab'), false);
+      assert.strictEqual(isUloCid(generateCid('ulo')), true);
+      assert.strictEqual(validateUlo({ ...sampleUlo, cid: 'cid_template_ab' }).valid, false);
     });
 
     it('should validate correctly', () => {
@@ -47,6 +60,11 @@ describe('COSYstudio ULO Engine Tests', () => {
   });
 
   describe('Target Transformation Engine', () => {
+    it('falls back to generic JSON for targets without a dedicated transform', () => {
+      const out = transformUlo(sampleUlo, 'COSYmagazine');
+      assert.strictEqual(out.format, 'GENERIC_JSON_REST');
+    });
+
     it('should transform ULO for COSYlanguages target', () => {
       const output = transformUlo(sampleUlo, 'COSYlanguages');
       assert.strictEqual(output.target, 'COSYlanguages');
