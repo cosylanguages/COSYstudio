@@ -1,0 +1,7 @@
+{
+  "name": "@cosy/studio-core",
+  "version": "1.0.0",
+  "description": "Shared foundation for the COSY studios: roles, verified sign-in, draft store, readiness checks",
+  "main": "studio-core.js",
+  "license": "MIT"
+}
