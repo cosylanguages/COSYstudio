@@ -2,6 +2,19 @@
 
 Welcome to the architectural specification for **COSYstudio**, the central Content Operating System (COS) for the entire **COSYlanguages** ecosystem.
 
+> ## Status: specification plus a small core library
+>
+> **Implemented and tested** (`src/`, `schemas/`): ULO TypeScript types, JSON schemas for ULOs and
+> lesson blocks, a validator, a content-ID helper, and a target transformer (dedicated output for
+> `COSYlanguages`, `COSYgames`, `COSYworld`, `PDF_WORKSHEET`; every other target returns generic JSON).
+>
+> **Not built yet:** everything described below as a "module", the Visual Lesson Builder, the AI
+> Assistant and its 21 actions, multiplayer editing, publishing pipelines and analytics. They are
+> the design target, not working software. The ecosystem has 13 repositories (see
+> [docs/ECOSYSTEM_REORG_PLAN.md](./docs/ECOSYSTEM_REORG_PLAN.md)); the table below lists 11.
+>
+> Run `npm test` to build and test; `npm run validate` checks the sample ULO.
+
 ## Vision & Purpose
 
 **COSYstudio is NOT an LMS.**
