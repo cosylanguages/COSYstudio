@@ -50,6 +50,9 @@ const PAYLOADS = [
   ['<table><tbody><tr><td colspan="2" onclick="x()">c</td></tr></tbody></table>', '<table><tbody><tr><td colspan="2">c</td></tr></tbody></table>'],
   ['<form action="x"><input></form>t', 't'],
   ['<b>bold</b> <em>it</em>', '<b>bold</b> <em>it</em>'],
+  ['<a href="https://ok.example" target="_blank" onclick="x()">x</a>', '<a href="https://ok.example" rel="noopener noreferrer" target="_blank">x</a>'],
+  ['<a href="https://ok.example" target="evil">x</a>', '<a href="https://ok.example" rel="noopener noreferrer">x</a>'],
+  ['<a target="_blank">x</a>', '<a>x</a>'],
   [null, ''], [42, '']
 ];
 
