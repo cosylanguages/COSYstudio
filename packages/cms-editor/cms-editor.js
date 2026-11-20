@@ -74,7 +74,11 @@
         }
         if (tag === 'a') {
           var href = node.hasAttribute('href') ? safeUrl(node.getAttribute('href'), LINK_PROTOCOLS) : null;
-          if (href) { el.setAttribute('href', href); el.setAttribute('rel', 'noopener noreferrer'); }
+          if (href) {
+            el.setAttribute('href', href);
+            el.setAttribute('rel', 'noopener noreferrer');
+            if (String(node.getAttribute('target') || '').toLowerCase() === '_blank') el.setAttribute('target', '_blank');
+          }
         }
         if (tag === 'img') {
           var src = node.hasAttribute('src') ? safeUrl(node.getAttribute('src'), IMG_PROTOCOLS) : null;
