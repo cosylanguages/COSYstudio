@@ -44,8 +44,8 @@ The content pipeline has been re-homed to `COSYplatform`: `publish_to_supabase.j
 `check-content-integrity.js`, `sanitize-student-lesson.js`,
 `convert-session-to-lesson.py` and `batch-convert-english-sessions.py` are present and
 byte-identical to the source copies. The publish and validate workflows are in
-`COSYplatform`, and the publish workflow now runs the integrity, language and
-protected-key checks before it uploads anything. `COSYplatform/lessons/spoken-en`
+`COSYplatform`, and the publish workflow now installs dependencies and runs the
+integrity, language and protected-key checks before it uploads anything. `COSYplatform/lessons/spoken-en`
 holds 443 files; the seven missing source files are the French and Russian lessons
 that were moved to `spoken-fr` and `spoken-ru`. The curriculum and grammar reference
 trees are restored, and 756 legacy placeholder lessons now carry draft metadata.
@@ -61,11 +61,12 @@ listed in its migration map but never copied. They contain no protected keys.
 
 What still blocks deleting `COSYplatform-source` is therefore:
 
-- `student-workbooks/` — the JSON workbooks carry `ans` answers. They must not be
-  committed to a public repository. `publish_to_supabase.js` now strips `ans` before
-  upload, but the repository needs a protected, git-ignored home before these files
-  move. `student-workbooks/data/workbook_data.js` is marked superseded and should not
-  be migrated.
+- `student-workbooks/` — the JSON workbooks now have a protected, git-ignored home in
+  `COSYplatform/student-workbooks/`. `scripts/seed-workbooks.js` splits each topic
+  into `lessons` (`kind='workbook'`), sanitized `lesson_student_content`, and
+  `lesson_protected` answer keys. `publish_to_supabase.js` skips the folder. The
+  remaining step is to run the seed with Supabase credentials, then remove the public
+  copy from `COSYplatform-source`. `workbook_data.js` is superseded and is not migrated.
 - `drafts/` — generated output, reproducible from `build_all_modules.py`; do not
   migrate.
 - The remaining build/test scripts, reports and fixtures — classify individually; none
