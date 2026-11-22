@@ -1,7 +1,7 @@
 # Founder CMS editor: comparison of the six copies
 
 Status: analysis only. No editor was changed. Surveyed 2026-11-19 from the default branch of each
-repository (`shared/js/cms-editor.js`). This is the input to Phase 4 of
+repository (`shared/js/cms-editor.js`). Sanitizer status updated 2026-11-22. This is the input to Phase 4 of
 [ECOSYSTEM_REORG_PLAN.md](./ECOSYSTEM_REORG_PLAN.md).
 
 ## What was found
@@ -11,13 +11,13 @@ repository (`shared/js/cms-editor.js`). This is the input to Phase 4 of
 | COSYevents | 444 | `COSY_USER.role` / `CosyAuth.role()`, normalised | DOMPurify (vendored), on render **and** save; keys must match `^[a-z0-9_-]+$` | `page_path` (PK), `content` jsonb |
 | COSYgames | 398 | `COSY_USER.app_metadata.role` only | own function, 5,000-char cap, on render and save | `pathname`, `content_overrides` |
 | COSYtools | 423 | user, `user_metadata`, `app_metadata`, **`localStorage` `cosy_role` / `COSY_USER`** | allow-list that rebuilds a clean tree, on render and save | `page_path` + `selector`, `content` |
-| COSYmanuals | 275 | `user_metadata.role`, `app_metadata.role`, `user.role`, `COSY_USER.role` | **none**: `el.innerHTML = override.content_html` | `page_path` + `element_id`, `content_html` |
-| COSYplatform | 332 | `COSY_USER.role`, then `profiles.role` from the database | **none**: `el.innerHTML = htmlContent` | `page_path` (PK), `overrides` jsonb |
-| COSYplatform-source | 325 | same as COSYplatform | **none** | same as COSYplatform |
+| COSYmanuals | 275 | `user_metadata.role`, `app_metadata.role`, `user.role`, `COSY_USER.role` | allow-list, on render **and** save | `page_path` + `element_id`, `content_html` |
+| COSYplatform | 332 | `COSY_USER.role`, then `profiles.role` from the database | allow-list, on render **and** save | `page_path` (PK), `overrides` jsonb |
+| COSYplatform-source | 414 | same as COSYplatform | allow-list, on render **and** save | same as COSYplatform |
 
 ## Findings, most important first
 
-1. **Three editors apply saved HTML to the page with no cleaning** (manuals, platform, platform-source).
+1. **Three editors originally applied saved HTML to the page with no cleaning** (manuals, platform, platform-source). All three now use the platform allow-list sanitizer on render and save; the source editor was the last to be fixed. Verify the deployed copies before adopting the shared package.
    Overrides are readable by everyone, so whatever a founder-level account saves runs for every visitor.
    All COSY sites share one origin, so script injected on one site can reach the sessions of the others
    (COSYtools' own sanitizer comment says the same). The write path is limited to founder roles by
