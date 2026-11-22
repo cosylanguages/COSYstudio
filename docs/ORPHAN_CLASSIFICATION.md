@@ -50,9 +50,26 @@ holds 443 files; the seven missing source files are the French and Russian lesso
 that were moved to `spoken-fr` and `spoken-ru`. The curriculum and grammar reference
 trees are restored, and 756 legacy placeholder lessons now carry draft metadata.
 
-What still blocks deleting `COSYplatform-source` is the 604 unique `lessons/` files
-(451 derived, 153 authored) and the 58 unique `curriculums/` files. The `drafts/`
-tree is generated output and should not be migrated.
+A path-level comparison corrects the remaining blocker. Every one of the 604
+`lessons/` paths and all 141 `curriculums/` paths already exist in `COSYplatform`. The
+hashes differ because the platform copies are sanitized, not because content is
+missing. The seven `spoken-en` files absent by path are the French and Russian lessons
+that now live in `spoken-fr` and `spoken-ru`.
+
+`templates/` and `teacher-guides/` have now been restored to `COSYplatform`; both were
+listed in its migration map but never copied. They contain no protected keys.
+
+What still blocks deleting `COSYplatform-source` is therefore:
+
+- `student-workbooks/` — the JSON workbooks carry `ans` answers. They must not be
+  committed to a public repository. `publish_to_supabase.js` now strips `ans` before
+  upload, but the repository needs a protected, git-ignored home before these files
+  move. `student-workbooks/data/workbook_data.js` is marked superseded and should not
+  be migrated.
+- `drafts/` — generated output, reproducible from `build_all_modules.py`; do not
+  migrate.
+- The remaining build/test scripts, reports and fixtures — classify individually; none
+  is student content.
 
 ---
 
