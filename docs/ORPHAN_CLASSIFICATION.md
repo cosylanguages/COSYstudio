@@ -33,6 +33,27 @@ Four rescues are executed and in review: `curriculums/` (COSYplatform PR #48),
 `activities/`, `data/` and `docs/` (COSYplatform PR #49), and `cefr/`
 (COSYplatform PR #50).
 
+### Progress since the survey (2026-11-22)
+
+A fresh content-hash sweep of `COSYplatform-source` against the other eleven
+repositories now finds **1,437 unique files**, down from 1,637. The remaining unique
+files are concentrated in `drafts/` (686), `lessons/` (604), `curriculums/` (58),
+`scripts/` (26) and `shared/` (18).
+
+The content pipeline has been re-homed to `COSYplatform`: `publish_to_supabase.js`,
+`check-content-integrity.js`, `sanitize-student-lesson.js`,
+`convert-session-to-lesson.py` and `batch-convert-english-sessions.py` are present and
+byte-identical to the source copies. The publish and validate workflows are in
+`COSYplatform`, and the publish workflow now runs the integrity, language and
+protected-key checks before it uploads anything. `COSYplatform/lessons/spoken-en`
+holds 443 files; the seven missing source files are the French and Russian lessons
+that were moved to `spoken-fr` and `spoken-ru`. The curriculum and grammar reference
+trees are restored, and 756 legacy placeholder lessons now carry draft metadata.
+
+What still blocks deleting `COSYplatform-source` is the 604 unique `lessons/` files
+(451 derived, 153 authored) and the 58 unique `curriculums/` files. The `drafts/`
+tree is generated output and should not be migrated.
+
 ---
 
 ## 1. `COSYplatform-source` (old `COSYplatform`)
