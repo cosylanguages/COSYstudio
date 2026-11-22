@@ -33,6 +33,44 @@ Four rescues are executed and in review: `curriculums/` (COSYplatform PR #48),
 `activities/`, `data/` and `docs/` (COSYplatform PR #49), and `cefr/`
 (COSYplatform PR #50).
 
+### Progress since the survey (2026-11-22)
+
+A fresh content-hash sweep of `COSYplatform-source` against the other eleven
+repositories now finds **1,437 unique files**, down from 1,637. The remaining unique
+files are concentrated in `drafts/` (686), `lessons/` (604), `curriculums/` (58),
+`scripts/` (26) and `shared/` (18).
+
+The content pipeline has been re-homed to `COSYplatform`: `publish_to_supabase.js`,
+`check-content-integrity.js`, `sanitize-student-lesson.js`,
+`convert-session-to-lesson.py` and `batch-convert-english-sessions.py` are present and
+byte-identical to the source copies. The publish and validate workflows are in
+`COSYplatform`, and the publish workflow now runs the integrity, language and
+protected-key checks before it uploads anything. `COSYplatform/lessons/spoken-en`
+holds 443 files; the seven missing source files are the French and Russian lessons
+that were moved to `spoken-fr` and `spoken-ru`. The curriculum and grammar reference
+trees are restored, and 756 legacy placeholder lessons now carry draft metadata.
+
+A path-level comparison corrects the remaining blocker. Every one of the 604
+`lessons/` paths and all 141 `curriculums/` paths already exist in `COSYplatform`. The
+hashes differ because the platform copies are sanitized, not because content is
+missing. The seven `spoken-en` files absent by path are the French and Russian lessons
+that now live in `spoken-fr` and `spoken-ru`.
+
+`templates/` and `teacher-guides/` have now been restored to `COSYplatform`; both were
+listed in its migration map but never copied. They contain no protected keys.
+
+What still blocks deleting `COSYplatform-source` is therefore:
+
+- `student-workbooks/` — the JSON workbooks carry `ans` answers. They must not be
+  committed to a public repository. `publish_to_supabase.js` now strips `ans` before
+  upload, but the repository needs a protected, git-ignored home before these files
+  move. `student-workbooks/data/workbook_data.js` is marked superseded and should not
+  be migrated.
+- `drafts/` — generated output, reproducible from `build_all_modules.py`; do not
+  migrate.
+- The remaining build/test scripts, reports and fixtures — classify individually; none
+  is student content.
+
 ---
 
 ## 1. `COSYplatform-source` (old `COSYplatform`)
